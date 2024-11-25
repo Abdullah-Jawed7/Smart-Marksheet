@@ -144,10 +144,10 @@ let percentage = (perObt/perTotal)*100
       setLoading(false);
     }
   };
-  const generateQRCode = (rollNumber: string) => {
-   const url = `https://yourdomain.com/marksheet/${rollNumber}`;
-   const qrCodeDataURL = QRCode.toDataURL(url);
-   return qrCodeDataURL;}
+  // const generateQRCode = (rollNumber: string) => {
+  //  const url = `https://yourdomain.com/marksheet/${rollNumber}`;
+  //  const qrCodeDataURL = QRCode.toDataURL(url);
+  //  return qrCodeDataURL;}
  
 
   const addSubject = () => {
@@ -539,13 +539,11 @@ let percentage = (perObt/perTotal)*100
         
     <div className="report-card">
         <div className="header">
-          <div className="head">
+          
             <h1>REPORT CARD</h1>
             <h2>DJ Sindh Govt. Science College</h2>
-            </div>
-            <div id="qrcodes">
-              <img src={String(generateQRCode(studentInfo.rollNo))} alt="" />
-            </div>
+           
+           
         </div>
 
         <div className="info-section">
