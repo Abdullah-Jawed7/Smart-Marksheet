@@ -114,7 +114,7 @@ export default function SmartMarksheet() {
         setError(errorData.error || "Failed to add user");
       }
 
-      console.log("try"  ,error);
+      alert(`${studentInfo.name} registered Successfully`)
       
     } catch (error) {
       console.log("error" ,error);
@@ -181,7 +181,7 @@ export default function SmartMarksheet() {
   const updateSubject = (
     subjectIndex: number,
     field: keyof Subject,
-    value: string | Question[]
+    value: string | Question[] |{ obtained: string; total: string }
   ) => {
     const newSubjects = [...studentInfo.subjects];
     newSubjects[subjectIndex] = {
@@ -304,7 +304,7 @@ export default function SmartMarksheet() {
                           onChange={(e) =>
                             updateSubject(subjectIndex, "mcq", {
                               ...subject.mcq,
-                              obtained: e.target.value,
+                              obtained : e.target.value,
                             })
                           }
                         />

@@ -59,71 +59,71 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 }
 
 // Handle DELETE requests: Delete a student by roll number
-export async function DELETE(request: NextRequest): Promise<NextResponse> {
-  try {
-    const { rollNo }: { rollNo: string } = await request.json();
+// export async function DELETE(request: NextRequest): Promise<NextResponse> {
+//   try {
+//     const { rollNo }: { rollNo: string } = await request.json();
 
-    if (!rollNo) {
-      return NextResponse.json(
-        { error: 'Roll number is required' },
-        { status: 400 }
-      );
-    }
+//     if (!rollNo) {
+//       return NextResponse.json(
+//         { error: 'Roll number is required' },
+//         { status: 400 }
+//       );
+//     }
 
-    // Filter out the student with the specified roll number
-    const updatedStudents = students.filter((student) => student.rollNo !== rollNo);
+//     // Filter out the student with the specified roll number
+//     const updatedStudents = students.filter((student) => student.rollNo !== rollNo);
 
-    if (updatedStudents.length === students.length) {
-      return NextResponse.json(
-        { error: 'Student with the given roll number not found' },
-        { status: 404 }
-      );
-    }
+//     if (updatedStudents.length === students.length) {
+//       return NextResponse.json(
+//         { error: 'Student with the given roll number not found' },
+//         { status: 404 }
+//       );
+//     }
 
-    students = updatedStudents;
+//     students = updatedStudents;
 
-    return NextResponse.json(
-      { message: 'Student deleted successfully' },
-      { status: 200 }
-    );
-  } catch (error) {
-    return NextResponse.json(
-      { error: 'Invalid request' },
-      { status: 500 }
-    );
-  }
-}
+//     return NextResponse.json(
+//       { message: 'Student deleted successfully' },
+//       { status: 200 }
+//     );
+//   } catch (error) {
+//     return NextResponse.json(
+//       { error: 'Invalid request' },
+//       { status: 500 }
+//     );
+//   }
+// }
 // Handle DELETE requests: Delete a student by roll number
-export async function FIND(request: NextRequest): Promise<NextResponse> {
-  try {
-    const { rollNo }: { rollNo: string } = await request.json();
+// export async function FIND(request: NextRequest): Promise<NextResponse> {
+//   try {
+//     const { rollNo }: { rollNo: string } = await request.json();
 
-    if (!rollNo) {
-      return NextResponse.json(
-        { error: 'Roll number is required' },
-        { status: 400 }
-      );
-    }
+//     if (!rollNo) {
+//       return NextResponse.json(
+//         { error: 'Roll number is required' },
+//         { status: 400 }
+//       );
+//     }
 
-    // Filter out the student with the specified roll number
-    const updatedStudent = students.find((student) => student.rollNo == rollNo);
+//     // Filter out the student with the specified roll number
+//     const updatedStudent = students.find((student) => student.rollNo == rollNo);
 
-    if (updatedStudent) {
-      return NextResponse.json(
-        { error: 'Student with the given roll number not found' },
-        { status: 404 }
-      );
-    }
+//     if (updatedStudent) {
+//       return NextResponse.json(
+//         { error: 'Student with the given roll number not found' },
+//         { status: 404 }
+//       );
+//     }
 
-    // students = updatedStudents;
+//     // students = updatedStudents;
 
-    return NextResponse.json(
-      { updatedStudent }, { status: 200 }
-    );
-  } catch (error) {
-    return NextResponse.json(
-      { error: 'Invalid request' },
-      { status: 500 }
-    );
-  }
-}
+//     return NextResponse.json(
+//       { updatedStudent }, { status: 200 }
+//     );
+//   } catch (error) {
+//     return NextResponse.json(
+//       { error: 'Invalid request' },
+//       { status: 500 }
+//     );
+//   }
+// }
