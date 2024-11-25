@@ -27,7 +27,7 @@ export default function Header() {
         <header className="px-4 lg:px-6 h-16 flex items-center bg-white dark:bg-gray-800 shadow-md">
       <Link href="/" className="flex items-center justify-center">
       <MortarboardIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-        <span className="ml-2 text-xl font-bold text-blue-900 dark:text-blue-100">ExamInsights</span>
+        <span className="ml-2 text-xl font-bold text-blue-900 dark:text-blue-100">Smart Marksheet</span>
       </Link>
       <nav className="ml-auto flex gap-4 sm:gap-6">
         <Button className="text-sm font-medium text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400" variant="ghost">Home</Button>

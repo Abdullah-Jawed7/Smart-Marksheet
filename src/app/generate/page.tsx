@@ -23,6 +23,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import Header from "@/components/compo/header";
+import Footer from "@/components/compo/footer";
+import './style.css';
+import QRCode from 'qrcode';
 
 const gradeScale = [
   { min: 90, grade: "A+" },
@@ -73,26 +77,43 @@ export default function SmartMarksheet() {
   const [users, setUsers] = useState<StudentInfo[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  // const [name, setName] = useState('');
-  // const [email, setEmail] = useState('');
+  let marksheetContent =  studentInfo.subjects.map((std)=>{
+    let longOptN:number = 0;
+    let longTotalN:number = 0;
+    let shortOptN:number = 0;
+    let shortTotalN:number = 0;
+      let mcqObt =Number(std.mcq.obtained )
+      let mcqTotal =Number(std.mcq.total )
+let longPer = std.longQuestions.forEach((i)=>{
+ longOptN =+ i.obtainedMarks
+ longTotalN =+ i.totalMarks
 
-  // Fetch all users on page load
-  // useEffect(() => {
-  //   const fetchUsers = async () => {
-  //     try {
-  //       const response = await fetch('/api/user');
-  //       const data = await response.json();
-  //       setUsers(data.users || []);
-  //     } catch (error) {
-  //       console.error('Failed to fetch users:', error);
-  //     }
-  //   };
+})
+let ShortPer = std.shortQuestions.forEach((i)=>{
+ shortOptN =+ i.obtainedMarks
+ shortTotalN =+ i.totalMarks
 
-  //   fetchUsers();
-  // }, []);
+})
+console.log(longPer ,ShortPer);
 
-  // Add a new user
+let perObt =mcqObt+shortOptN +longOptN  
+let perTotal =mcqTotal +shortTotalN + longTotalN
+let percentage = (perObt/perTotal)*100
+
+      return(
+      <tr key={studentInfo.rollNo}>
+                    <td className="subject">{std.name}</td>
+                    <td>{percentage}</td>
+                    <td>{calculateGrade(percentage)}</td>
+                   
+                </tr>
+      
+     ) })
+ 
+
   const addUser = async () => {
+
+
     console.log("start");
     
     setLoading(true);
@@ -123,6 +144,11 @@ export default function SmartMarksheet() {
       setLoading(false);
     }
   };
+  const generateQRCode = (rollNumber: string) => {
+   const url = `https://yourdomain.com/marksheet/${rollNumber}`;
+   const qrCodeDataURL = QRCode.toDataURL(url);
+   return qrCodeDataURL;}
+ 
 
   const addSubject = () => {
     setStudentInfo({
@@ -139,10 +165,6 @@ export default function SmartMarksheet() {
     });
   };
 
-  //   const totalMarks = studentInfo.subjects.reduce((sum, subject) => sum + subject.mcq.obtained  , 0)
-  //   const totalPossibleMarks = studentInfo.subjects.reduce((sum, subject) => sum + subject.totalMarks, 0)
-  //   const overallPercentage = (totalMarks / totalPossibleMarks) * 100
-  //   const overallGrade = calculateGrade(overallPercentage)
 
   const removeSubject = (index: number) => {
     const newSubjects = studentInfo.subjects.filter((_, i) => i !== index);
@@ -191,7 +213,8 @@ export default function SmartMarksheet() {
     setStudentInfo({ ...studentInfo, subjects: newSubjects });
   };
 
-  return (
+  return (<>
+  <Header/>
     <div className="container mx-auto p-6 space-y-8 bg-gray-50 min-h-screen">
       <h1 className="text-4xl font-bold text-center mb-8 text-gray-800">
         Smart Marksheet
@@ -513,60 +536,76 @@ export default function SmartMarksheet() {
               <CardTitle className="text-2xl">Student Marksheet</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <strong>Name:</strong> {studentInfo.name}
-                  </div>
-                  <div>
-                    <strong>Roll No:</strong> {studentInfo.rollNo}
-                  </div>
-                  <div>
-                    <strong>Class:</strong> {studentInfo.class}
-                  </div>
-                  <div>
-                    <strong>Section:</strong> {studentInfo.group}
-                  </div>
-                </div>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Subject</TableHead>
-                      <TableHead>Marks</TableHead>
-                      <TableHead>Percentage</TableHead>
-                      <TableHead>Grade</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {studentInfo.subjects.map((subject, index) => (
-                      <TableRow key={index}>
-                        <TableCell>{subject.name}</TableCell>
-                        <TableCell>{subject.mcq.obtained}</TableCell>
-                        <TableCell>
-                          {Number(subject.mcq.obtained) /
-                            Number(subject.mcq.total)}
-                        </TableCell>
-                        <TableCell></TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-                <div className="text-right">
-                  <div>
-                    <strong>Total Marks:</strong>{" "}
-                  </div>
-                  <div>
-                    <strong>Percentage:</strong>{" "}
-                  </div>
-                  <div>
-                    <strong>Overall Grade:</strong>
-                  </div>
-                </div>
-              </div>
+        
+    <div className="report-card">
+        <div className="header">
+          <div className="head">
+            <h1>REPORT CARD</h1>
+            <h2>DJ Sindh Govt. Science College</h2>
+            </div>
+            <div id="qrcodes">
+              <img src={String(generateQRCode(studentInfo.rollNo))} alt="" />
+            </div>
+        </div>
+
+        <div className="info-section">
+            <div className="info-field">
+                <label>Name:</label>
+                <div className="line">{studentInfo.name}</div>
+            </div>
+            <div className="info-field">
+                <label>Roll No:</label>
+                <div className="line">{studentInfo.rollNo}</div>
+            </div>
+            <div className="info-field">
+                <label>Class</label>
+                <div className="line">{studentInfo.class}</div>
+            </div>
+            <div className="info-field">
+                <label>Group</label>
+                <div className="line">{studentInfo.group}</div>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>SUBJECT</th>
+                    <th>Percentage</th>
+                    <th>GRADE</th>
+                   
+                </tr>
+            </thead>
+            <tbody>
+            { marksheetContent}
+             
+            </tbody>
+        </table>
+
+        <div className="grading-section">
+            <div className="grading-scale">
+                <h3>Grading Scale</h3>
+                <div className="grade-item">A = 93-100</div>
+                <div className="grade-item">A- = 90-92</div>
+                <div className="grade-item">B = 85-89</div>
+                <div className="grade-item">C = 78-84</div>
+                <div className="grade-item">D = 70-77</div>
+                <div className="grade-item">FAIL = 69 and below</div>
+            </div>
+            <div className="grading-scale">
+                <h3>Total Days of School</h3>
+                <div className="grade-item">Days Attended: ___265____</div>
+                <div className="grade-item">Days Absent: __27__</div>
+            </div>
+        </div>
+    </div>
+
+              
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
     </div>
-  );
+    <Footer/>
+  </>);
 }
