@@ -11,8 +11,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Progress } from "@/components/ui/progress"
 import { ChevronDown, FileText, PercentIcon, X, TrendingUp, BookOpen, Briefcase, GraduationCap, BrainCircuit } from 'lucide-react'
-import {  studentData } from "../../utils/studentData"
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Cell } from 'recharts'
+import {  studentDef } from "../../utils/studentData"
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts'
 
 interface Question {
   obtainedMarks: string;
@@ -36,11 +36,16 @@ interface StudentInfo {
 }
 
 // In-memory database for storing student information
+
 let students: StudentInfo[] = [];
-// let  studentData :StudentInfo ;
+let  studentData :StudentInfo =studentDef[0] ;
 export default function StudentProfile({params}:{params:{
   num:string
 }}) {
+
+  let contentInf = studentDef.find((i)=>i.rollNo == params.num)
+  if(contentInf)studentData = contentInf
+  else studentData =studentDef[0]
 
 //   useEffect(() => {
 //     const fetchUsers = async () => {
@@ -96,73 +101,59 @@ export default function StudentProfile({params}:{params:{
   }
 
   return (
-   
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 sm:p-6 md:p-8 lg:p-10"
+    >
+      <div className="mx-auto max-w-7xl">
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.5 }}
-          className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100 p-4 sm:p-6 md:p-8 lg:p-10"
+          className="space-y-6 sm:space-y-8 md:space-y-10"
         >
-          <div className="mx-auto max-w-7xl">
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.5 }}
-              className="space-y-6 sm:space-y-8 md:space-y-10"
-            >
-              <Card className="overflow-hidden bg-white/80 backdrop-blur-sm">
-                <CardHeader className="pb-2 sm:pb-4">
-                  <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
-                    <motion.div 
-                      whileHover={{ scale: 1.1 }} 
-                      whileTap={{ scale: 0.9 }}
-                      className="relative"
-                    >
-                      <Avatar className="h-20 w-20 sm:h-24 sm:w-24 md:h-28 md:w-28 ring-2 ring-purple-500 ring-offset-2">
-                        <AvatarImage src="/placeholder.svg?height=112&width=112" alt={studentData.name} />
-                        <AvatarFallback>{studentData.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                      </Avatar>
-                      <motion.div 
-                        className="absolute -top-1 -right-1 bg-green-500 rounded-full p-1"
-                        animate={{ scale: [1, 1.2, 1] }}
-                        transition={{ repeat: Infinity, duration: 2 }}
-                      >
-                        <PercentIcon className="h-4 w-4 text-white" />
-                      </motion.div>
-                    </motion.div>
-                    <div className="text-center sm:text-left">
-                      <CardTitle className="text-3xl sm:text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600">{studentData?.name}</CardTitle>
-                      <p className="text-sm sm:text-base md:text-lg text-muted-foreground">Academic Profile</p>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid gap-6 sm:gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-                    <StudentInfo />
-                    <PerformanceGraph graphType={graphType} setGraphType={setGraphType} />
-                  </div>
-                  <MoreDetails 
-                    showDetails={showDetails} 
-                    setShowDetails={setShowDetails}
-                    selectedSubject={selectedSubject}
-                    setSelectedSubject={setSelectedSubject}
-                    handleSubjectClick={handleSubjectClick}
-                    handleQuestionTypeClick={handleQuestionTypeClick}
-                    graphType={graphType}
-                    setGraphType={setGraphType}
-                  />
-                </CardContent>
-              </Card>
-              <Summary />
-              <ResultAnalysisAndSuggestions />
-              <ImprovementGuidelines />
-              <CareerSuggestions />
-            </motion.div>
-          </div>
+          <Card className="overflow-hidden">
+            <CardHeader className="pb-2 sm:pb-4">
+              <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+                {/* <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+                  <Avatar className="h-20 w-20 sm:h-24 sm:w-24 md:h-28 md:w-28">
+                    <AvatarImage src="/placeholder.svg?height=112&width=112" alt={studentData.name} />
+                    <AvatarFallback>{studentData.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                  </Avatar>
+                </motion.div> */}
+                <div className="text-center sm:text-left">
+                  <CardTitle className="text-3xl sm:text-4xl md:text-5xl font-bold">{studentData?.name}</CardTitle>
+                  <p className="text-sm sm:text-base md:text-lg text-muted-foreground">Academic Profile</p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-6 sm:gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                <StudentInfo />
+                <PerformanceGraph graphType={graphType} setGraphType={setGraphType} />
+              </div>
+              <MoreDetails 
+                showDetails={showDetails} 
+                setShowDetails={setShowDetails}
+                selectedSubject={selectedSubject}
+                setSelectedSubject={setSelectedSubject}
+                handleSubjectClick={handleSubjectClick}
+                handleQuestionTypeClick={handleQuestionTypeClick}
+                graphType={graphType}
+                setGraphType={setGraphType}
+              />
+            </CardContent>
+          </Card>
+          <Summary />
+          <ResultAnalysisAndSuggestions />
+          <ImprovementGuidelines />
+          <CareerSuggestions />
         </motion.div>
-      
+      </div>
+    </motion.div>
   )
-
 }
 
 function StudentInfo() {
@@ -232,95 +223,88 @@ function SubjectList() {
 // ... (keep other existing functions)
 
 function PerformanceGraph({ graphType, setGraphType }: { graphType: string, setGraphType: (type: string) => void }) {
-    const data = studentData?.subjects.map(subject => ({
-      name: subject.name,
-      percentage: calculateSubjectPercentage(subject)
-    }));
-  
-    const colors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
-  
-    return (
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-        className="space-y-4 md:col-span-2"
-      >
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-medium">Performance Graph</h3>
-          <Select value={graphType} onValueChange={setGraphType}>
-            <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="Graph type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="bar">Bar Graph</SelectItem>
-              <SelectItem value="line">Line Graph</SelectItem>
-              <SelectItem value="pie">Pie Chart</SelectItem>
-              <SelectItem value="radar">Radar Chart</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="h-[200px] sm:h-[250px] md:h-[300px]">
-          <ResponsiveContainer width="100%" height="100%">
-            {(() => {
-              if (graphType === "bar") {
-                return (
-                  <BarChart data={data}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="percentage" fill="#8884d8">
-                      {data.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                )
-              } else if (graphType === "line") {
-                return (
-                  <LineChart data={data}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Line type="monotone" dataKey="percentage" stroke="#8884d8" strokeWidth={2} dot={{ stroke: '#8884d8', strokeWidth: 2, r: 4 }} activeDot={{ r: 8 }} />
-                  </LineChart>
-                )
-              } else if (graphType === "pie") {
-                return (
-                  <PieChart>
-                    <Pie dataKey="percentage" nameKey="name" data={data} fill="#8884d8" label>
-                      {data.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                    <Legend />
-                  </PieChart>
-                )
-              } else if (graphType === "radar") {
-                return (
-                  <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data}>
-                    <PolarGrid />
-                    <PolarAngleAxis dataKey="name" />
-                    <PolarRadiusAxis angle={30} domain={[0, 100]} />
-                    <Radar name="Percentage" dataKey="percentage" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
-                    <Legend />
-                  </RadarChart>
-                )
-              } else {
-                return <div>Please select a chart type</div>;
-              }
-            })()}
-          </ResponsiveContainer>
-        </div>
-      </motion.div>
-    )
-  }
-  
+  const data = studentData?.subjects.map(subject => ({
+    name: subject.name,
+    percentage: calculateSubjectPercentage(subject)
+  }));
+console.log(graphType);
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.4 }}
+      className="space-y-4 md:col-span-2"
+    >
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-medium">Performance Graph</h3>
+        <Select value={graphType} onValueChange={setGraphType}>
+          <SelectTrigger className="w-[140px]">
+            <SelectValue placeholder="Graph type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="bar">Bar Graph</SelectItem>
+            <SelectItem value="line">Line Graph</SelectItem>
+            <SelectItem value="pie">Pie Chart</SelectItem>
+            <SelectItem value="radar">Radar Chart</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="h-[200px] sm:h-[250px] md:h-[300px]">
+         
+        <ResponsiveContainer width="100%" height="100%">
+         
+          {(
+          ()=>{
+          if (graphType === "bar" ) {
+            return(
+               <BarChart data={data}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="percentage" fill="#8884d8" />
+            </BarChart>)
+          }
+           else if (graphType === "line") {
+            return(
+            <LineChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="name" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Line type="monotone" dataKey="percentage" stroke="#8884d8" />
+          </LineChart>)
+           }
+           else if (graphType === "pie") {
+            return(  <PieChart>
+              <Pie dataKey="percentage" nameKey="name" data={data} fill="#8884d8" label />
+              <Tooltip />
+            </PieChart>)
+           }
+           else if (graphType === "radar") {
+            return(
+              <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data}>
+              <PolarGrid />
+              <PolarAngleAxis dataKey="name" />
+              <PolarRadiusAxis angle={30} domain={[0, 100]} />
+              <Radar name="Percentage" dataKey="percentage" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
+              <Legend />
+            </RadarChart>
+            )
+           }else{
+            return <div>first select chart type</div>; 
+           }
+          })()
+           }
+         
+        </ResponsiveContainer>
+      </div>
+    </motion.div>
+  )
+}
 
 function SubjectOverview({ subject, graphType, setGraphType }: { subject: Subject, graphType: string, setGraphType: (type: string) => void }) {
   const mcqPercentage = (parseInt(subject.mcq.obtained) / parseInt(subject.mcq.total)) * 100;
@@ -662,27 +646,25 @@ function MoreDetails({ showDetails, setShowDetails, selectedSubject, setSelected
   )
 }
 
-
 function SubjectPerformance({ handleSubjectClick }: { handleSubjectClick: (subject: Subject) => void }) {
-    return (
-      <div className="space-y-3 rounded-lg border p-4 bg-white/50 backdrop-blur-sm">
-        {studentData.subjects.map((subject, index: number) => (
-          <motion.div
-            key={subject.name}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.1 * index }}
-            className="flex items-center justify-between cursor-pointer hover:bg-gray-50 p-2 rounded-md transition-colors duration-200"
-            onClick={() => handleSubjectClick(subject)}
-          >
-            <span className={`text-sm font-medium text-${getSubjectColor(subject.name)}-500`}>{subject.name}</span>
-            <span className="text-sm font-semibold">{calculateSubjectPercentage(subject).toFixed(2)}%</span>
-          </motion.div>
-        ))}
-      </div>
-    )
-  }
-  
+  return (
+    <div className="space-y-3 rounded-lg border p-4">
+      {studentData.subjects.map((subject, index: number) => (
+        <motion.div
+          key={subject.name}
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.1 * index }}
+          className="flex items-center justify-between cursor-pointer hover:bg-gray-50 p-2 rounded-md"
+          onClick={() => handleSubjectClick(subject)}
+        >
+          <span className={`text-sm font-medium text-${getSubjectColor(subject.name)}-500`}>{subject.name}</span>
+          <span className="text-sm">{calculateSubjectPercentage(subject).toFixed(2)}%</span>
+        </motion.div>
+      ))}
+    </div>
+  )
+}
 
 function SubjectAnalysis({ selectedSubject, setSelectedSubject, handleQuestionTypeClick , graphType, setGraphType}: {
   selectedSubject: Subject | null,
