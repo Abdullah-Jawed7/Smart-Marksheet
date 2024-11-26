@@ -356,7 +356,7 @@ export const studentDef=[
     ]
   },
   {
-    name: "Jalal Bhayo",
+    name: "Hassan Imran",
     rollNo: "1390",
     class: "11",
     group: "science",

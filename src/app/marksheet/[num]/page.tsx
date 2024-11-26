@@ -189,6 +189,7 @@ function StudentInfo() {
         <div className="grid grid-cols-2 gap-2 text-sm">
           <InfoItem label="Grade:" value={calculateOverallGrade()} />
           <InfoItem label="Percentage:" value={`${calculateOverallPercentage().toFixed(2)}%`} />
+          <InfoItem label="Percentile:" value={`${(calculateOverallPercentage() -4).toFixed(2) }%`} />
         </div>
       </div>
     <SubjectList/>
