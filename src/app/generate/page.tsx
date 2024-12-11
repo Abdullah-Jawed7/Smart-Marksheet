@@ -255,6 +255,7 @@ let percentage = (perObt/perTotal)*100
                 <Select
                   value={studentInfo.class}
                   onValueChange={(value) => updateStudentInfo("class", value)}
+                  
                 >
                   <SelectTrigger id="class">
                     <SelectValue placeholder="Select your class" />

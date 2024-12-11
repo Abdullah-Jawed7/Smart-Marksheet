@@ -13,6 +13,9 @@ import { Progress } from "@/components/ui/progress"
 import { ChevronDown, FileText, PercentIcon, X, TrendingUp, BookOpen, Briefcase, GraduationCap, BrainCircuit } from 'lucide-react'
 import {  studentDef } from "../../utils/studentData"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Cell } from 'recharts'
+import { useParams } from 'next/navigation';
+import { useStudentContext } from '@/components/hook/data';
+import Link from "next/link"
 
 interface Question {
   obtainedMarks: string;
@@ -37,53 +40,35 @@ interface StudentInfo {
 
 // In-memory database for storing student information
 let students: StudentInfo[] = [];
-// let  studentData :StudentInfo ;
-let studentData: StudentInfo = studentDef[0];
-export default function StudentProfile({params}:{params:{
-  num:string
-}}) {
+let studentInf:StudentInfo | undefined;
+// let studentData: StudentInfo;
+export default function StudentProfile() {
 
-  let contentInf = studentDef.find((i)=>i.rollNo == params.num)
-  if(contentInf)studentData = contentInf
-  else studentData =studentDef[0]
 
-//   useEffect(() => {
-//     const fetchUsers = async () => {
-//       try {
-//         const response = await fetch('/api/user');
-//         const data = await response.json();
-//         students = [...data.students] 
-//        console.log(data ,'===data');
-//        console.log(students ,'===datasub');
+  const { studentData, setStudentData } = useStudentContext();
+  const params = useParams();
+  const rollNo = params.num as string;
 
-//        if(students){
-//        let studentInf = students.find((std)=>std.rollNo == params.num)
-//        console.log(studentInf ,'===studentData');
-//        console.log( students[0].rollNo , 'rolll no');
-//        console.log(params.num , 'url no');
-//        console.log(studentInf?.name );
-       
-//  if (studentInf ) {
-//    studentData = studentDef
-//    console.log("hello");
-   
-//   } else {
-//   console.log("hello2");
-//   setTimeout(() => {
-//     studentData = studentDef
-//   },10000)
-//  }
-       
-      
-//        }
-       
-//       } catch (error) {
-//         console.error('Failed to fetch users:', error);
-//       }
-//     };
+  // Fetch student data based on roll number
+  useEffect(() => {
+    const fetchStudentData = async () => {
+      try {
+        const response = await fetch(`/api/user?rollNo=${rollNo}`);
+        if (response.ok) {
+          const data = await response.json();
+          setStudentData(data.student);
+        }
+      } catch (error) {
+        console.error('Error fetching student data:', error);
+      }
+    };
 
-//     fetchUsers();
-//   }, []);
+    fetchStudentData();
+  }, [rollNo, setStudentData]);
+
+  if (!studentData) {
+    return <p>Loading...</p>;
+  }
 
 
   const [showDetails, setShowDetails] = useState(false)
@@ -162,6 +147,7 @@ export default function StudentProfile({params}:{params:{
               <ResultAnalysisAndSuggestions />
               <ImprovementGuidelines />
               <CareerSuggestions />
+              <Details/>
             </motion.div>
           </div>
         </motion.div>
@@ -171,6 +157,7 @@ export default function StudentProfile({params}:{params:{
 }
 
 function StudentInfo() {
+  const { studentData } = useStudentContext();
   return (
     <>
     <motion.div 
@@ -199,6 +186,7 @@ function StudentInfo() {
 }
 
 function InfoItem({ label, value }: { label: string, value: string }) {
+ 
   return (
     <div>
       <p className="text-muted-foreground">{label}</p>
@@ -208,6 +196,7 @@ function InfoItem({ label, value }: { label: string, value: string }) {
 }
 
 function SubjectList() {
+  const { studentData } = useStudentContext();
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -238,9 +227,10 @@ function SubjectList() {
 // ... (keep other existing functions)
 
 function PerformanceGraph({ graphType, setGraphType }: { graphType: string, setGraphType: (type: string) => void }) {
+  const { studentData } = useStudentContext();
     const data = studentData?.subjects.map(subject => ({
       name: subject.name,
-      percentage: calculateSubjectPercentage(subject)
+      percentage: calculateSubjectPercentage(subject).toFixed(2)
     }));
   
     const colors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
@@ -329,6 +319,7 @@ function PerformanceGraph({ graphType, setGraphType }: { graphType: string, setG
   
 
 function SubjectOverview({ subject, graphType, setGraphType }: { subject: Subject, graphType: string, setGraphType: (type: string) => void }) {
+  const { studentData } = useStudentContext();
   const mcqPercentage = (parseInt(subject.mcq.obtained) / parseInt(subject.mcq.total)) * 100;
   const shortQuestionsPercentage = calculateQuestionTypePercentage(subject.shortQuestions);
   const longQuestionsPercentage = calculateQuestionTypePercentage(subject.longQuestions);
@@ -431,11 +422,12 @@ function SubjectOverview({ subject, graphType, setGraphType }: { subject: Subjec
 }
 
 function QuestionAnalysis({ type, questions, graphType, setGraphType }: { type: string, questions: { obtainedMarks: string, totalMarks: string, topic: string }[], graphType: string, setGraphType: (type: string) => void }) {
+  const { studentData } = useStudentContext();
   const data = questions.map(q => ({
     topic: q.topic,
     percentage: (parseInt(q.obtainedMarks) / parseInt(q.totalMarks)) * 100
   }));
-
+  const colors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
   return (
     <Card className="mt-4 sm:mt-6">
       <CardHeader className="pb-2 sm:pb-4">
@@ -480,54 +472,61 @@ function QuestionAnalysis({ type, questions, graphType, setGraphType }: { type: 
               </SelectContent>
             </Select>
             <div className="h-[300px] sm:h-[350px] md:h-[400px]">
-              <ResponsiveContainer width="100%" height="100%">
-              {(
-          ()=>{
-          if (graphType === "bar" ) {
-            return(
-              <BarChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="topic" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="percentage" fill="#8884d8" />
-            </BarChart>)
-          }
-           else if (graphType === "line") {
-            return(
-              <LineChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="topic" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Line type="monotone" dataKey="percentage" stroke="#8884d8" />
-            </LineChart>)
-           }
-           else if (graphType === "pie") {
-            return(  <PieChart>
-              <Pie dataKey="percentage" nameKey="topic" data={data} fill="#8884d8" label />
-              <Tooltip />
-            </PieChart>)
-           }
-           else if (graphType === "radar") {
-            return(
-              <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data}>
+            <ResponsiveContainer width="100%" height="100%">
+            {(() => {
+              if (graphType === "bar") {
+                return (
+                  <BarChart data={data}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="percentage" fill="#8884d8">
+                      {data.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                )
+              } else if (graphType === "line") {
+                return (
+                  <LineChart data={data}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Line type="monotone" dataKey="percentage" stroke="#8884d8" strokeWidth={2} dot={{ stroke: '#8884d8', strokeWidth: 2, r: 4 }} activeDot={{ r: 8 }} />
+                  </LineChart>
+                )
+              } else if (graphType === "pie") {
+                return (
+                  <PieChart>
+                    <Pie dataKey="percentage" nameKey="name" data={data} fill="#8884d8" label>
+                      {data.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                  </PieChart>
+                )
+              } else if (graphType === "radar") {
+                return (
+                  <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data}>
                     <PolarGrid />
-                    <PolarAngleAxis dataKey="topic" />
+                    <PolarAngleAxis dataKey="name" />
                     <PolarRadiusAxis angle={30} domain={[0, 100]} />
                     <Radar name="Percentage" dataKey="percentage" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
                     <Legend />
                   </RadarChart>
-            )
-           }else{
-            return <div>first select chart type</div>; 
-           }
-          })()
-           }
-         
-              </ResponsiveContainer>
+                )
+              } else {
+                return <div>Please select a chart type</div>;
+              }
+            })()}
+          </ResponsiveContainer>
             </div>
           </div>
         </motion.div>
@@ -537,6 +536,7 @@ function QuestionAnalysis({ type, questions, graphType, setGraphType }: { type: 
 }
 
 function ResultAnalysisAndSuggestions() {
+  const { studentData } = useStudentContext();
   const weakTopics = identifyWeakTopics();
 
   return (
@@ -576,6 +576,7 @@ function ResultAnalysisAndSuggestions() {
 // ... (keep other existing functions)
 
 function identifyWeakTopics(): { subject: string, topic: string }[] {
+  const { studentData } = useStudentContext();
   const weakTopics: { subject: string, topic: string }[] = [];
 
   studentData?.subjects.forEach(subject => {
@@ -632,6 +633,7 @@ function MoreDetails({ showDetails, setShowDetails, selectedSubject, setSelected
   handleQuestionTypeClick: (type: string) => void,
   graphType: string, setGraphType: (type: string) => void 
 }) {
+  const { studentData } = useStudentContext();
   return (
     <div className="mt-6">
       <Button 
@@ -642,7 +644,14 @@ function MoreDetails({ showDetails, setShowDetails, selectedSubject, setSelected
         <span>{showDetails ? 'Hide Details' : 'More Details'}</span>
         <ChevronDown className={`ml-2 h-4 w-4 transition-transform ${showDetails ? 'rotate-180' : ''}`} />
       </Button>
-
+      <Button 
+        variant="outline" 
+        className="w-1/2 sm:w-auto ml-4"
+      >
+       <Link href={`/sheet/${studentData.rollNo}`}> 
+       <span>Marksheet</span></Link>
+        
+      </Button>
       <AnimatePresence>
         {showDetails && (
           <motion.div
@@ -670,7 +679,8 @@ function MoreDetails({ showDetails, setShowDetails, selectedSubject, setSelected
 
 
 function SubjectPerformance({ handleSubjectClick }: { handleSubjectClick: (subject: Subject) => void }) {
-    return (
+  const { studentData } = useStudentContext();
+   return (
       <div className="space-y-3 rounded-lg border p-4 bg-white/50 backdrop-blur-sm">
         {studentData.subjects.map((subject, index: number) => (
           <motion.div
@@ -697,6 +707,7 @@ setSelectedSubject: (subject: Subject | null) => void,
   graphType: string, setGraphType: (type: string) => void 
 
 }) {
+  const { studentData } = useStudentContext();
   return (
     <AnimatePresence>
       {selectedSubject && (
@@ -751,10 +762,34 @@ setSelectedSubject: (subject: Subject | null) => void,
 
 
 function Summary() {
-  const overallPercentage = calculateOverallPercentage();
-  const strengths = identifyStrengths();
-  const weaknesses = identifyWeaknesses();
+  // const overallPercentage = calculateOverallPercentage();
+  // const strengths = identifyStrengths();
+  // const weaknesses = identifyWeaknesses();
+  const { studentData } = useStudentContext();
+  const [detail ,setDetail] =useState<JSX.Element>()
+  const fetchStudentData = async () => {
+    try {
+      const { GoogleGenerativeAI } = require("@google/generative-ai");
 
+      const genAI = new GoogleGenerativeAI("AIzaSyC9RVDBFrIK6Y6CHhiW2widc5ifCGGLPVA");
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      
+      const prompt = `
+      Analyze the student's performance: Name: ${studentData.name}, Class: ${studentData.class}.
+      - Provide a short summary of overall performance.
+      Here's the data: ${JSON.stringify(studentData.subjects)}.
+      Note: Use escape characters for a formatting on browser dont use starts in response.
+      `;
+      
+      const result = await model.generateContent(prompt);
+      setDetail((result?.response?.text()) as JSX.Element);
+      // console.log(typeof( detail) , detail );
+    } catch (error) {
+      console.log('from ai' ,error);
+      
+    }
+  }
+fetchStudentData()
   return (
     <Card>
       <CardContent className="pt-6">
@@ -763,10 +798,7 @@ function Summary() {
             <BookOpen className="h-5 w-5" />
             <h2 className="text-xl font-semibold">Summary</h2>
           </div>
-          <p className="text-muted-foreground">
-            {studentData?.name} is a {getPerformanceLevel(overallPercentage)} student with an overall percentage of {overallPercentage.toFixed(2)}%. 
-            Their strengths lie particularly in {strengths?.join(', ')}, while there's room for improvement in {weaknesses?.join(', ')}.
-          </p>
+        {detail}
         </div>
       </CardContent>
     </Card>
@@ -774,8 +806,32 @@ function Summary() {
 }
 
 function ImprovementGuidelines() {
+  const { studentData } = useStudentContext();
   const weaknesses = identifyWeaknesses();
+  const [detail ,setDetail] =useState<JSX.Element>(<pre></pre>)
+  const fetchStudentData = async () => {
+    try {
+      const { GoogleGenerativeAI } = require("@google/generative-ai");
 
+      const genAI = new GoogleGenerativeAI("AIzaSyC9RVDBFrIK6Y6CHhiW2widc5ifCGGLPVA");
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      
+      const prompt = `
+      Analyze the student's performance: Name: ${studentData.name}, Class: ${studentData.class}.
+       - Identify topic-wise weaknesses.
+      - Suggest actionable short recommendations for improvement for each weak topic.
+      Here's the data: ${JSON.stringify(studentData.subjects)}.
+      Note: dont use starts for heading and separating.
+      `;
+      
+      const result = await model.generateContent(prompt);
+      setDetail(<pre>{result?.response?.text()}</pre>);
+    } catch (error) {
+      console.log('from ai' ,error);
+      
+    }
+  }
+fetchStudentData()
   return (
     <Card>
       <CardContent className="pt-6">
@@ -784,15 +840,16 @@ function ImprovementGuidelines() {
             <GraduationCap className="h-5 w-5" />
             <h2 className="text-xl font-semibold">Guidelines for Improvement</h2>
           </div>
-          <Accordion type="single" collapsible className="w-full">
-            {weaknesses?.map((weakness, index) => (
+          <Accordion type="single" collapsible className="w-full overflow-auto">
+            {detail}
+            {/* {weaknesses?.map((weakness, index) => (
               <AccordionItem key={index} value={`item-${index}`}>
                 <AccordionTrigger>Improve {weakness}</AccordionTrigger>
                 <AccordionContent>
                   {getImprovementSuggestion(weakness)}
                 </AccordionContent>
               </AccordionItem>
-            ))}
+            ))} */}
           </Accordion>
         </div>
       </CardContent>
@@ -801,25 +858,51 @@ function ImprovementGuidelines() {
 }
 
 function CareerSuggestions() {
+  const { studentData } = useStudentContext();
   const strengths = identifyStrengths();
   const careers = getCareerSuggestions(strengths);
+  const [detail ,setDetail] =useState<JSX.Element>(<pre></pre>)
 
+  const fetchStudentData = async () => {
+    try {
+      const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+      const genAI = new GoogleGenerativeAI("AIzaSyC9RVDBFrIK6Y6CHhiW2widc5ifCGGLPVA");
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      
+      const prompt = `
+      Analyze the student's performance: Name: ${studentData.name}, Class: ${studentData.class}.
+      - Based on the analysis, suggest potential career paths considering strengths and interests.
+      Here's the data: ${JSON.stringify(studentData.subjects)}.
+       Note: Please avoid stars and provide only 5 suggestion and their one line introduction.
+      `;
+      
+      const result = await model.generateContent(prompt);
+      setDetail(<pre>{result?.response?.text()}</pre>);
+      // console.log(typeof( detail) , detail );
+    } catch (error) {
+      console.log('from ai' ,error);
+      
+    }
+  }
+fetchStudentData()
   return (
     <Card>
       <CardContent className="pt-6">
-        <div className="space-y-4">
+        <div className="space-y-4 overflow-auto">
           <div className="flex items-center gap-2">
             <BrainCircuit className="h-5 w-5" />
             <h2 className="text-xl font-semibold">Career Suggestions</h2>
           </div>
-          <p className="text-muted-foreground">
+          {detail}
+          {/* <p className="text-muted-foreground">
             Based on your academic performance and strengths in {strengths?.join(', ')}, here are some career paths you might consider:
           </p>
           <ul className="space-y-2 list-disc pl-5 text-muted-foreground">
             {careers?.map((career, index) => (
               <li key={index}>{career}</li>
             ))}
-          </ul>
+          </ul> */}
         </div>
       </CardContent>
     </Card>
@@ -849,6 +932,7 @@ function calculateSubjectPercentage(subject: Subject): number {
 }
 
 function calculateOverallPercentage(): number {
+  const { studentData } = useStudentContext();
   const totalMarks = studentData?.subjects.reduce((sum: number, subject: { mcq: { total: string }; shortQuestions: any[]; longQuestions: any[] }) => sum + 
     parseInt(subject?.mcq.total) + 
     subject?.shortQuestions.reduce((sum: number, q: { totalMarks: string }) => sum + parseInt(q.totalMarks), 0) +
@@ -893,12 +977,14 @@ function getPerformanceLevel(percentage: number): string {
 }
 
 function identifyStrengths(): string[] {
+  const { studentData } = useStudentContext();
   return studentData?.subjects
     .filter((subject: any) => calculateSubjectPercentage(subject) >= 80)
     .map((subject: { name: any }) => subject.name);
 }
 
 function identifyWeaknesses(): string[] {
+  const { studentData } = useStudentContext();
   return studentData?.subjects
     .filter((subject: any) => calculateSubjectPercentage(subject) < 70)
     .map((subject: { name: any }) => subject.name);
@@ -925,3 +1011,48 @@ function getCareerSuggestions(strengths: string[]): string[] {
   return strengths?.flatMap(strength => careerMap[strength] || []);
 }
 
+function Details(){
+  const [detail ,setDetail] =useState<JSX.Element>(<pre></pre>)
+  // const { studentData } = useStudentContext();
+  const { studentData } = useStudentContext();
+
+  
+  const fetchStudentData = async () => {
+    try {
+      const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+      const genAI = new GoogleGenerativeAI("AIzaSyC9RVDBFrIK6Y6CHhiW2widc5ifCGGLPVA");
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      
+      const prompt = `
+      Analyze the student's performance: Name: ${studentData.name}, Class: ${studentData.class}.
+      - Provide a detailed summary of overall performance.
+      - Identify topic-wise weaknesses.
+      - Suggest actionable recommendations for improvement for each weak topic.
+      - Provide Youtube Videos and documents related every week topic to improve them.
+      - Based on the analysis, suggest potential career paths considering strengths and interests.
+      Here's the data: ${JSON.stringify(studentData.subjects)}.
+      
+      `;
+      
+      const result = await model.generateContent(prompt);
+      setDetail(<pre >{result?.response?.text()}</pre>);
+      console.log(detail);
+      
+    } catch (error) {
+      console.log('from ai' ,error);
+      
+      
+    }
+  }
+
+fetchStudentData()
+return (
+  <Card>
+  <CardTitle>Analysis</CardTitle>
+  <CardContent className="overflow-auto">
+{detail}
+  </CardContent>
+</Card>
+)
+}

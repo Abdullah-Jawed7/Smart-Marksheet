@@ -23,13 +23,42 @@ interface StudentInfo {
 }
 
 // In-memory database for storing student information
-let students: StudentInfo[] = [];
+let students: StudentInfo[] = [
+  {
+    name: 'Adullah',
+    rollNo: '369',
+    class: '10th',
+    group: 'Science',
+    subjects: [
+      {
+        name: 'Mathematics',
+        mcq: { obtained: '18', total: '20' },
+        shortQuestions: [
+          { obtainedMarks: '8', totalMarks: '10', topic: 'Algebra' },
+        ],
+        longQuestions: [
+          { obtainedMarks: '15', totalMarks: '20', topic: 'Geometry' },
+        ],
+      },
+    ],
+  },
+];
 
 // Handle GET requests: Fetch all students
-export async function GET(): Promise<NextResponse> {
-  return NextResponse.json({ students }, { status: 200 });
-}
+// export async function GET(): Promise<NextResponse> {
+//   return NextResponse.json({ students }, { status: 200 });
+// }
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const rollNo = searchParams.get('rollNo');
 
+  const student = students.find((s) => s.rollNo === rollNo);
+  if (!student) {
+    return NextResponse.json({ error: 'Student not found' }, { status: 404 });
+  }
+
+  return NextResponse.json({ student });
+}
 // Handle POST requests: Add a new student
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState ,useEffect } from "react"
+import { useState ,useEffect, JSXElementConstructor } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -13,6 +13,11 @@ import { Progress } from "@/components/ui/progress"
 import { ChevronDown, FileText, PercentIcon, X, TrendingUp, BookOpen, Briefcase, GraduationCap, BrainCircuit } from 'lucide-react'
 import {  studentDef } from "../../utils/studentData"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts'
+import { useParams } from 'next/navigation';
+import { useStudentContext } from '@/components/hook/data';
+import Link from "next/link"
+import Image from "next/image"
+// import require from '@google/generative-ai'
 
 interface Question {
   obtainedMarks: string;
@@ -35,55 +40,35 @@ interface StudentInfo {
   subjects: Subject[];
 }
 
-// In-memory database for storing student information
 
-let students: StudentInfo[] = [];
-let  studentData :StudentInfo =studentDef[0] ;
-export default function StudentProfile({params}:{params:{
-  num:string
-}}) {
+export default function StudentProfile() {
+ 
 
-  let contentInf = studentDef.find((i)=>i.rollNo == params.num)
-  if(contentInf)studentData = contentInf
-  else studentData =studentDef[0]
+  const { studentData, setStudentData } = useStudentContext();
+  const params = useParams();
+  const rollNo = params.nume as string;
 
-//   useEffect(() => {
-//     const fetchUsers = async () => {
-//       try {
-//         const response = await fetch('/api/user');
-//         const data = await response.json();
-//         students = [...data.students] 
-//        console.log(data ,'===data');
-//        console.log(students ,'===datasub');
+  // Fetch student data based on roll number
+  useEffect(() => {
+    const fetchStudentData = async () => {
+      try {
+        const response = await fetch(`/api/user?rollNo=${rollNo}`);
+        if (response.ok) {
+          const data = await response.json();
+          setStudentData(data.student);
+        }
+      } catch (error) {
+        console.error('Error fetching student data:', error);
+      }
+    };
 
-//        if(students){
-//        let studentInf = students.find((std)=>std.rollNo == params.num)
-//        console.log(studentInf ,'===studentData');
-//        console.log( students[0].rollNo , 'rolll no');
-//        console.log(params.num , 'url no');
-//        console.log(studentInf?.name );
-       
-//  if (studentInf ) {
-//    studentData = studentDef
-//    console.log("hello");
-   
-//   } else {
-//   console.log("hello2");
-//   setTimeout(() => {
-//     studentData = studentDef
-//   },10000)
-//  }
-       
-      
-//        }
-       
-//       } catch (error) {
-//         console.error('Failed to fetch users:', error);
-//       }
-//     };
+    fetchStudentData();
+  }, [rollNo, setStudentData]);
 
-//     fetchUsers();
-//   }, []);
+  if (!studentData) {
+    return <p>Loading...</p>;
+  }
+
 
 
   const [showDetails, setShowDetails] = useState(false)
@@ -150,6 +135,7 @@ export default function StudentProfile({params}:{params:{
           <ResultAnalysisAndSuggestions />
           <ImprovementGuidelines />
           <CareerSuggestions />
+          <Details/>
         </motion.div>
       </div>
     </motion.div>
@@ -157,6 +143,7 @@ export default function StudentProfile({params}:{params:{
 }
 
 function StudentInfo() {
+  const { studentData  } = useStudentContext();
   return (
     <>
     <motion.div 
@@ -177,6 +164,7 @@ function StudentInfo() {
           <InfoItem label="Percentage:" value={`${calculateOverallPercentage().toFixed(2)}%`} />
         </div>
       </div>
+      <div className="btn"><button className="h-8 w-24 ">MarkSheet</button></div>
     <SubjectList/>
     </motion.div>
     </>
@@ -193,6 +181,7 @@ function InfoItem({ label, value }: { label: string, value: string }) {
 }
 
 function SubjectList() {
+  const { studentData } = useStudentContext();
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -223,9 +212,10 @@ function SubjectList() {
 // ... (keep other existing functions)
 
 function PerformanceGraph({ graphType, setGraphType }: { graphType: string, setGraphType: (type: string) => void }) {
+  const { studentData } = useStudentContext();
   const data = studentData?.subjects.map(subject => ({
     name: subject.name,
-    percentage: calculateSubjectPercentage(subject)
+    percentage: calculateSubjectPercentage(subject).toFixed(2)
   }));
 console.log(graphType);
 
@@ -411,7 +401,7 @@ function SubjectOverview({ subject, graphType, setGraphType }: { subject: Subjec
 function QuestionAnalysis({ type, questions, graphType, setGraphType }: { type: string, questions: { obtainedMarks: string, totalMarks: string, topic: string }[], graphType: string, setGraphType: (type: string) => void }) {
   const data = questions.map(q => ({
     topic: q.topic,
-    percentage: (parseInt(q.obtainedMarks) / parseInt(q.totalMarks)) * 100
+    percentage: ((parseInt(q.obtainedMarks) / parseInt(q.totalMarks)) * 100).toFixed(2)
   }));
 
   return (
@@ -554,6 +544,7 @@ function ResultAnalysisAndSuggestions() {
 // ... (keep other existing functions)
 
 function identifyWeakTopics(): { subject: string, topic: string }[] {
+  const { studentData } = useStudentContext();
   const weakTopics: { subject: string, topic: string }[] = [];
 
   studentData?.subjects.forEach(subject => {
@@ -609,7 +600,9 @@ function MoreDetails({ showDetails, setShowDetails, selectedSubject, setSelected
   handleSubjectClick: (subject: Subject) => void,
   handleQuestionTypeClick: (type: string) => void,
   graphType: string, setGraphType: (type: string) => void 
+  
 }) {
+  const { studentData } = useStudentContext();
   return (
     <div className="mt-6">
       <Button 
@@ -619,6 +612,14 @@ function MoreDetails({ showDetails, setShowDetails, selectedSubject, setSelected
       >
         <span>{showDetails ? 'Hide Details' : 'More Details'}</span>
         <ChevronDown className={`ml-2 h-4 w-4 transition-transform ${showDetails ? 'rotate-180' : ''}`} />
+      </Button>
+      <Button 
+        variant="outline" 
+        className="w-1/2 sm:w-auto ml-4"
+      >
+       <Link href={`/sheet/${studentData.rollNo}`}> 
+       <span>Marksheet</span></Link>
+        
       </Button>
 
       <AnimatePresence>
@@ -630,7 +631,7 @@ function MoreDetails({ showDetails, setShowDetails, selectedSubject, setSelected
             transition={{ duration: 0.3 }}
             className="mt-4 grid gap-4 sm:grid-cols-3 "
           >
-            <SubjectPerformance handleSubjectClick={handleSubjectClick} />
+            <SubjectPerformance handleSubjectClick={handleSubjectClick} selectedSubject={selectedSubject} />
             <SubjectAnalysis 
               selectedSubject={selectedSubject} 
               setSelectedSubject={setSelectedSubject}
@@ -639,6 +640,7 @@ function MoreDetails({ showDetails, setShowDetails, selectedSubject, setSelected
               setGraphType={setGraphType}
 
             />
+            
           </motion.div>
         )}
       </AnimatePresence>
@@ -646,10 +648,14 @@ function MoreDetails({ showDetails, setShowDetails, selectedSubject, setSelected
   )
 }
 
-function SubjectPerformance({ handleSubjectClick }: { handleSubjectClick: (subject: Subject) => void }) {
+function SubjectPerformance({ handleSubjectClick ,selectedSubject }: { handleSubjectClick: (subject: Subject) => void , selectedSubject: Subject | null,
+ }) {
+  const { studentData } = useStudentContext();
+  
   return (
     <div className="space-y-3 rounded-lg border p-4">
       {studentData.subjects.map((subject, index: number) => (
+        <>
         <motion.div
           key={subject.name}
           initial={{ opacity: 0, x: -20 }}
@@ -661,6 +667,11 @@ function SubjectPerformance({ handleSubjectClick }: { handleSubjectClick: (subje
           <span className={`text-sm font-medium text-${getSubjectColor(subject.name)}-500`}>{subject.name}</span>
           <span className="text-sm">{calculateSubjectPercentage(subject).toFixed(2)}%</span>
         </motion.div>
+        <Modal
+             selectedSubject={selectedSubject} 
+             />
+         {/* <button onClick={()=>HandleModal()} >Exam Paper</button> */}
+         </>
       ))}
     </div>
   )
@@ -673,6 +684,7 @@ setSelectedSubject: (subject: Subject | null) => void,
   graphType: string, setGraphType: (type: string) => void 
 
 }) {
+  const { studentData } = useStudentContext();
   return (
     <AnimatePresence>
       {selectedSubject && (
@@ -731,6 +743,34 @@ function Summary() {
   const strengths = identifyStrengths();
   const weaknesses = identifyWeaknesses();
 
+  const [detail ,setDetail] =useState<JSX.Element>()
+  const { studentData } = useStudentContext();
+ 
+
+  
+  const fetchStudentData = async () => {
+    try {
+      const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+      const genAI = new GoogleGenerativeAI("AIzaSyC9RVDBFrIK6Y6CHhiW2widc5ifCGGLPVA");
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      
+      const prompt = `
+      Analyze the student's performance: Name: ${studentData.name}, Class: ${studentData.class}.
+      - Provide a short summary of overall performance.
+      Here's the data: ${JSON.stringify(studentData.subjects)}.
+      Note: Use escape characters for a formatting on browser dont use starts in response.
+      `;
+      
+      const result = await model.generateContent(prompt);
+      setDetail((result?.response?.text()) as JSX.Element);
+      // console.log(typeof( detail) , detail );
+    } catch (error) {
+      console.log('from ai' ,error);
+      
+    }
+  }
+fetchStudentData()
   return (
     <Card>
       <CardContent className="pt-6">
@@ -739,10 +779,13 @@ function Summary() {
             <BookOpen className="h-5 w-5" />
             <h2 className="text-xl font-semibold">Summary</h2>
           </div>
+          {detail && (detail)}
+         {!detail && (
           <p className="text-muted-foreground">
             {studentData?.name} is a {getPerformanceLevel(overallPercentage)} student with an overall percentage of {overallPercentage.toFixed(2)}%. 
             Their strengths lie particularly in {strengths?.join(', ')}, while there's room for improvement in {weaknesses?.join(', ')}.
           </p>
+        )}
         </div>
       </CardContent>
     </Card>
@@ -751,16 +794,134 @@ function Summary() {
 
 function ImprovementGuidelines() {
   const weaknesses = identifyWeaknesses();
+  // const { studentData } = useStudentContext();  
+  const [detail ,setDetail] =useState<JSX.Element>(<pre></pre>)
 
+  let studentData ={
+    name: "Abdul Hadi",
+    rollNo: "1398",
+    class: "11",
+    group: "science",
+    subjects: [
+      {
+        name: "Computer",
+        mcq: { obtained: "20", total: "20" },
+        shortQuestions: [
+          { obtainedMarks: "3", totalMarks: "5", topic: "Network" },
+          { obtainedMarks: "4", totalMarks: "5", topic: "Architecture" },
+          { obtainedMarks: "4.5", totalMarks: "5", topic: "Topology" },
+          { obtainedMarks: "4", totalMarks: "5", topic: "Input Devices" },
+          { obtainedMarks: "4", totalMarks: "5", topic: "Algorithms" }
+        ],
+        longQuestions: [
+          { obtainedMarks: "8", totalMarks: "10", topic: "Security" },
+          { obtainedMarks: "9", totalMarks: "10", topic: "OSI Model" },
+          { obtainedMarks: "9.5", totalMarks: "10", topic: "Storage Devices" }
+        ]
+      },
+      {
+        name: "Chemistry",
+        mcq: { obtained: "10", total: "10" },
+        shortQuestions: [
+          { obtainedMarks: "4", totalMarks: "5", topic: "organic" },
+          { obtainedMarks: "4.5", totalMarks: "5", topic: "chemical substance" },
+          { obtainedMarks: "3", totalMarks: "5", topic: "instrument errors" },
+          { obtainedMarks: "5", totalMarks: "5", topic: "BioChemistry" },
+          { obtainedMarks: "5", totalMarks: "5", topic: "Minerals" }
+        ],
+        longQuestions: [
+          { obtainedMarks: "10", totalMarks: "10", topic: "Sugar Preparation" },
+          { obtainedMarks: "9", totalMarks: "10", topic: "Types of Chemistry" },
+          
+        ]
+      },
+      {
+        name: "Maths",
+        mcq: { obtained: "10", total: "10" },
+        shortQuestions: [
+          { obtainedMarks: "4", totalMarks: "5", topic: "Trigonometry" },
+          { obtainedMarks: "4.5", totalMarks: "5", topic: "Matrices" },
+          { obtainedMarks: "3", totalMarks: "5", topic: "Algebra" },
+          { obtainedMarks: "5", totalMarks: "5", topic: "Statistics" },
+          { obtainedMarks: "5", totalMarks: "5", topic: "Vectors" }
+        ],
+        longQuestions: [
+          { obtainedMarks: "10", totalMarks: "10", topic: "Graph" },
+          { obtainedMarks: "9", totalMarks: "10", topic: "Trigonometry" },
+          { obtainedMarks: "9.5", totalMarks: "10", topic: "Scalar" }
+        ]
+      },
+      {
+        name: "Physics",
+        mcq: { obtained: "10", total: "10" },
+        shortQuestions: [
+          { obtainedMarks: "4", totalMarks: "5", topic: "Projectile Motion" },
+          { obtainedMarks: "3", totalMarks: "5", topic: "Vectors" },
+          { obtainedMarks: "4", totalMarks: "5", topic: "Scalars" },
+          { obtainedMarks: "4.5", totalMarks: "5", topic: "Errors" },
+          { obtainedMarks: "2.5", totalMarks: "5", topic: "Significant Figures" },
+          { obtainedMarks: "4", totalMarks: "5", topic: "Motion" }
+        ],
+        longQuestions: [
+          { obtainedMarks: "10", totalMarks: "10", topic: "Circular Motion" },
+          { obtainedMarks: "9", totalMarks: "10", topic: "Linear Motion" },
+          { obtainedMarks: "9.5", totalMarks: "10", topic: "Laws Of Motion" }
+        ]
+      },
+      {
+        name: "English",
+        mcq: { obtained: "20", total: "20" },
+        shortQuestions: [
+          { obtainedMarks: "5", totalMarks: "5", topic: "Tenses" },
+          { obtainedMarks: "4.5", totalMarks: "5", topic: "Active Passive" },
+          { obtainedMarks: "2", totalMarks: "5", topic: "Don't Quit (poem)" },
+          { obtainedMarks: "3", totalMarks: "5", topic: "Ozymandias (poem)" },
+          { obtainedMarks: "3.5", totalMarks: "5", topic: "Choosing A Career(chapter)" }
+        ],
+        longQuestions: [
+          { obtainedMarks: "10", totalMarks: "10", topic: "Essay" },
+          { obtainedMarks: "9.5", totalMarks: "10", topic: "CV Writing" },
+          { obtainedMarks: "9.5", totalMarks: "10", topic: "Application" }
+        ]
+      }
+    ]
+  };
+
+  
+  const fetchStudentData = async () => {
+    try {
+      const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+      const genAI = new GoogleGenerativeAI("AIzaSyC9RVDBFrIK6Y6CHhiW2widc5ifCGGLPVA");
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      
+      const prompt = `
+      Analyze the student's performance: Name: ${studentData.name}, Class: ${studentData.class}.
+       - Identify topic-wise weaknesses.
+      - Suggest actionable short recommendations for improvement for each weak topic.
+      Here's the data: ${JSON.stringify(studentData.subjects)}.
+      Note: dont use starts for heading and separating.
+      `;
+      
+      const result = await model.generateContent(prompt);
+      setDetail(<pre>{result?.response?.text()}</pre>);
+    } catch (error) {
+      console.log('from ai' ,error);
+      
+    }
+  }
+fetchStudentData()
+// JSON.parse(detail).map()
   return (
     <Card>
       <CardContent className="pt-6">
-        <div className="space-y-4">
+        <div className="space-y-4 overflow-auto">
           <div className="flex items-center gap-2">
             <GraduationCap className="h-5 w-5" />
             <h2 className="text-xl font-semibold">Guidelines for Improvement</h2>
           </div>
-          <Accordion type="single" collapsible className="w-full">
+          {detail}
+          {/* <Accordion type="single" collapsible className="w-full">
             {weaknesses?.map((weakness, index) => (
               <AccordionItem key={index} value={`item-${index}`}>
                 <AccordionTrigger>Improve {weakness}</AccordionTrigger>
@@ -769,7 +930,7 @@ function ImprovementGuidelines() {
                 </AccordionContent>
               </AccordionItem>
             ))}
-          </Accordion>
+          </Accordion> */}
         </div>
       </CardContent>
     </Card>
@@ -779,23 +940,140 @@ function ImprovementGuidelines() {
 function CareerSuggestions() {
   const strengths = identifyStrengths();
   const careers = getCareerSuggestions(strengths);
+  
+  const [detail ,setDetail] =useState<JSX.Element>(<pre></pre>)
+  let studentData ={
+    name: "Abdul Hadi",
+    rollNo: "1398",
+    class: "11",
+    group: "science",
+    subjects: [
+      {
+        name: "Computer",
+        mcq: { obtained: "20", total: "20" },
+        shortQuestions: [
+          { obtainedMarks: "3", totalMarks: "5", topic: "Network" },
+          { obtainedMarks: "4", totalMarks: "5", topic: "Architecture" },
+          { obtainedMarks: "4.5", totalMarks: "5", topic: "Topology" },
+          { obtainedMarks: "4", totalMarks: "5", topic: "Input Devices" },
+          { obtainedMarks: "4", totalMarks: "5", topic: "Algorithms" }
+        ],
+        longQuestions: [
+          { obtainedMarks: "8", totalMarks: "10", topic: "Security" },
+          { obtainedMarks: "9", totalMarks: "10", topic: "OSI Model" },
+          { obtainedMarks: "9.5", totalMarks: "10", topic: "Storage Devices" }
+        ]
+      },
+      {
+        name: "Chemistry",
+        mcq: { obtained: "10", total: "10" },
+        shortQuestions: [
+          { obtainedMarks: "4", totalMarks: "5", topic: "organic" },
+          { obtainedMarks: "4.5", totalMarks: "5", topic: "chemical substance" },
+          { obtainedMarks: "3", totalMarks: "5", topic: "instrument errors" },
+          { obtainedMarks: "5", totalMarks: "5", topic: "BioChemistry" },
+          { obtainedMarks: "5", totalMarks: "5", topic: "Minerals" }
+        ],
+        longQuestions: [
+          { obtainedMarks: "10", totalMarks: "10", topic: "Sugar Preparation" },
+          { obtainedMarks: "9", totalMarks: "10", topic: "Types of Chemistry" },
+          
+        ]
+      },
+      {
+        name: "Maths",
+        mcq: { obtained: "10", total: "10" },
+        shortQuestions: [
+          { obtainedMarks: "4", totalMarks: "5", topic: "Trigonometry" },
+          { obtainedMarks: "4.5", totalMarks: "5", topic: "Matrices" },
+          { obtainedMarks: "3", totalMarks: "5", topic: "Algebra" },
+          { obtainedMarks: "5", totalMarks: "5", topic: "Statistics" },
+          { obtainedMarks: "5", totalMarks: "5", topic: "Vectors" }
+        ],
+        longQuestions: [
+          { obtainedMarks: "10", totalMarks: "10", topic: "Graph" },
+          { obtainedMarks: "9", totalMarks: "10", topic: "Trigonometry" },
+          { obtainedMarks: "9.5", totalMarks: "10", topic: "Scalar" }
+        ]
+      },
+      {
+        name: "Physics",
+        mcq: { obtained: "10", total: "10" },
+        shortQuestions: [
+          { obtainedMarks: "4", totalMarks: "5", topic: "Projectile Motion" },
+          { obtainedMarks: "3", totalMarks: "5", topic: "Vectors" },
+          { obtainedMarks: "4", totalMarks: "5", topic: "Scalars" },
+          { obtainedMarks: "4.5", totalMarks: "5", topic: "Errors" },
+          { obtainedMarks: "2.5", totalMarks: "5", topic: "Significant Figures" },
+          { obtainedMarks: "4", totalMarks: "5", topic: "Motion" }
+        ],
+        longQuestions: [
+          { obtainedMarks: "10", totalMarks: "10", topic: "Circular Motion" },
+          { obtainedMarks: "9", totalMarks: "10", topic: "Linear Motion" },
+          { obtainedMarks: "9.5", totalMarks: "10", topic: "Laws Of Motion" }
+        ]
+      },
+      {
+        name: "English",
+        mcq: { obtained: "20", total: "20" },
+        shortQuestions: [
+          { obtainedMarks: "5", totalMarks: "5", topic: "Tenses" },
+          { obtainedMarks: "4.5", totalMarks: "5", topic: "Active Passive" },
+          { obtainedMarks: "2", totalMarks: "5", topic: "Don't Quit (poem)" },
+          { obtainedMarks: "3", totalMarks: "5", topic: "Ozymandias (poem)" },
+          { obtainedMarks: "3.5", totalMarks: "5", topic: "Choosing A Career(chapter)" }
+        ],
+        longQuestions: [
+          { obtainedMarks: "10", totalMarks: "10", topic: "Essay" },
+          { obtainedMarks: "9.5", totalMarks: "10", topic: "CV Writing" },
+          { obtainedMarks: "9.5", totalMarks: "10", topic: "Application" }
+        ]
+      }
+    ]
+  };
+
+  
+  const fetchStudentData = async () => {
+    try {
+      const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+      const genAI = new GoogleGenerativeAI("AIzaSyC9RVDBFrIK6Y6CHhiW2widc5ifCGGLPVA");
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      
+      const prompt = `
+      Analyze the student's performance: Name: ${studentData.name}, Class: ${studentData.class}.
+      - Based on the analysis, suggest potential career paths considering strengths and interests.
+      Here's the data: ${JSON.stringify(studentData.subjects)}.
+       Note: Please avoid stars and provide only 5 suggestion and their one line introduction.
+      `;
+      
+      const result = await model.generateContent(prompt);
+      setDetail(<pre>{result?.response?.text()}</pre>);
+      // console.log(typeof( detail) , detail );
+    } catch (error) {
+      console.log('from ai' ,error);
+      
+    }
+  }
+fetchStudentData()
 
   return (
     <Card>
       <CardContent className="pt-6">
-        <div className="space-y-4">
+        <div className="space-y-4 overflow-auto">
           <div className="flex items-center gap-2">
             <BrainCircuit className="h-5 w-5" />
             <h2 className="text-xl font-semibold">Career Suggestions</h2>
           </div>
-          <p className="text-muted-foreground">
+{detail}
+          {/* <p className="text-muted-foreground">
             Based on your academic performance and strengths in {strengths?.join(', ')}, here are some career paths you might consider:
           </p>
           <ul className="space-y-2 list-disc pl-5 text-muted-foreground">
             {careers?.map((career, index) => (
               <li key={index}>{career}</li>
             ))}
-          </ul>
+          </ul> */}
         </div>
       </CardContent>
     </Card>
@@ -804,15 +1082,18 @@ function CareerSuggestions() {
 
 function getSubjectColor(subject: string): string {
   const colors: { [key: string]: string } = {
-    Computer: "blue",
-    Maths: "purple",
-    Physics: "green",
-    English: "yellow"
+    computer: "blue",
+    maths: "purple",
+    physics: "green",
+    english: "yellow",
+    islamiat: 'orange,'
   }
-  return colors[subject] || "gray"
+
+  return colors[subject.toLowerCase()] || "gray"
 }
 
 function calculateSubjectPercentage(subject: Subject): number {
+
   const totalMarks = parseInt(subject.mcq.total) + 
     subject?.shortQuestions.reduce((sum: number, q: { totalMarks: string }) => sum + parseInt(q.totalMarks), 0) +
     subject?.longQuestions.reduce((sum: number, q: { totalMarks: string }) => sum + parseInt(q.totalMarks), 0);
@@ -825,6 +1106,7 @@ function calculateSubjectPercentage(subject: Subject): number {
 }
 
 function calculateOverallPercentage(): number {
+  const { studentData } = useStudentContext();
   const totalMarks = studentData?.subjects.reduce((sum: number, subject: { mcq: { total: string }; shortQuestions: any[]; longQuestions: any[] }) => sum + 
     parseInt(subject?.mcq.total) + 
     subject?.shortQuestions.reduce((sum: number, q: { totalMarks: string }) => sum + parseInt(q.totalMarks), 0) +
@@ -869,12 +1151,14 @@ function getPerformanceLevel(percentage: number): string {
 }
 
 function identifyStrengths(): string[] {
+  const { studentData } = useStudentContext();
   return studentData?.subjects
-    .filter((subject: any) => calculateSubjectPercentage(subject) >= 80)
-    .map((subject: { name: any }) => subject.name);
+    ?.filter((subject: any) => calculateSubjectPercentage(subject) >= 80)
+    ?.map((subject: { name: any }) => subject.name);
 }
 
 function identifyWeaknesses(): string[] {
+  const { studentData } = useStudentContext();
   return studentData?.subjects
     .filter((subject: any) => calculateSubjectPercentage(subject) < 70)
     .map((subject: { name: any }) => subject.name);
@@ -901,3 +1185,158 @@ function getCareerSuggestions(strengths: string[]): string[] {
   return strengths?.flatMap(strength => careerMap[strength] || []);
 }
 
+ function Details(){
+  const [detail ,setDetail] =useState<JSX.Element>(<pre></pre>)
+  // const { studentData } = useStudentContext();
+  const { studentData } = useStudentContext();
+
+  
+  const fetchStudentData = async () => {
+    try {
+      const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+      const genAI = new GoogleGenerativeAI("AIzaSyC9RVDBFrIK6Y6CHhiW2widc5ifCGGLPVA");
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      
+      const prompt = `
+      Analyze the student's performance: Name: ${studentData.name}, Class: ${studentData.class}.
+      - Provide a detailed summary of overall performance.
+      - Identify topic-wise weaknesses.
+      - Suggest actionable recommendations for improvement for each weak topic.
+      - Based on the analysis, suggest potential career paths considering strengths and interests.
+      Here's the data: ${JSON.stringify(studentData.subjects)}.
+      
+      `;
+      
+      const result = await model.generateContent(prompt);
+      setDetail(<pre >{result?.response?.text()}</pre>);
+      console.log(detail);
+      
+    } catch (error) {
+      console.log('from ai' ,error);
+      
+    }
+  }
+
+fetchStudentData()
+return (
+  <Card>
+  <CardTitle>Analysis</CardTitle>
+  <CardContent className="overflow-auto">
+
+{detail}
+  </CardContent>
+</Card>
+)
+}
+
+function Modal({ selectedSubject, }:
+{ selectedSubject: Subject | null,
+  // setSelectedSubject: (subject: Subject | null) => void,
+  // handleSubjectClick: (subject: Subject) => void,
+})
+{
+ 
+
+  let content ={
+    name:'urdu'
+  }
+
+  let images :string[] = [];
+let selectImages: { [key: string]: string[] } = {
+  math:['/math2.jpg'],
+  urdu:['/urdu1.jpg','/urdu2.jpg','/urdu3.jpg'],
+  computer:['/computer2.jpg'],
+  english:['/english1.jpg' ,'/english2.jpg'],
+  islamiat:['islamiat1.jpg','/islamiat2.jpg'],
+  physics:['/physics1.jpg' ,'/physics2.jpg']
+}
+
+useEffect(()=>{
+  // let sub =selectedSubject?.name.toLowerCase
+  let sub =content?.name
+
+ let img = selectImages[`${sub}`]  
+ img.forEach((i)=>images.push(i))
+},[selectedSubject])
+
+
+ 
+  
+  let currentIndex = 0;
+  const [modal ,setModal ] =useState(false)
+  const [index ,setIndex ] =useState(0)
+  // const modal = document.querySelector('.modal');
+  // const modalImage = document.querySelector('.modal-image');
+  // const openCarouselButton = document.getElementById('open-carousel');
+  // const closeButton = document.querySelector('.close-button');
+  // const prevButton = document.querySelector('.prev-button');
+  // const nextButton = document.querySelector('.next-button');
+  
+  // // Open the carousel
+  // openCarouselButton?.addEventListener('click', () => {
+  //   modal? = 'flex';
+  //   modalImage.src = images[currentIndex];
+  // });
+  
+  // // Close the carousel
+  // closeButton.addEventListener('click', () => {
+  //   modal.style.animation = 'fadeOut 0.3s ease-in-out';
+  //   setTimeout(() => {
+  //     modal.style.display = 'none';
+  //     modal.style.animation = ''; // Reset animation for future openings
+  //   }, 300);
+  // });
+  
+  // // Show the previous image
+  // prevButton.addEventListener('click', () => {
+  //   currentIndex = (currentIndex - 1 + images.length) % images.length;
+  //   modalImage.src = images[currentIndex];
+  // });
+  
+  // // Show the next image
+  // nextButton.addEventListener('click', () => {
+  //   currentIndex = (currentIndex + 1) % images.length;
+  //   modalImage.src = images[currentIndex];
+  // });
+  
+  // // Optional: Close the modal when clicking outside the content
+  // modal.addEventListener('click', (e) => {
+  //   if (e.target === modal) {
+  //     closeButton.click();
+  //   }
+  // });
+
+
+
+  return(
+
+    <>
+  <button onClick={()=>setModal(!modal)} id="open-carousel" className="px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition">
+    Open Image Carousel
+  </button>
+
+ 
+  <div id="modal" className={`${modal ? 'flex' :'hidden'}  fixed inset-0  bg-black bg-opacity-60  items-center justify-center`}>
+    <div className="relative bg-white rounded-lg p-4 max-w-3xl w-full flex flex-col items-center">
+      {/* <!-- Close Button --> */}
+      <button onClick={()=>setModal(!modal)} id="close-button" className="absolute top-3 right-3 text-white bg-red-500 w-8 h-8 rounded-full flex items-center justify-center hover:bg-red-600 transition">
+        &times;
+      </button>
+
+      {/* <!-- Image --> */}
+      <Image id="modal-image" src={images[index]} width={600} height={1000} alt="Projection" className="w-full max-h-[500px] object-contain rounded-lg shadow-md"/>
+
+      {/* <!-- Navigation Buttons --> */}
+      <button onClick={()=>setIndex((currentIndex - 1 + images.length) % images.length)} id="prev-button" className="absolute left-1 top-1/2 -translate-y-1/2 text-white bg-gray-800 p-2 rounded-full hover:bg-gray-700 transition">
+        &#10094;
+      </button>
+      <button onClick={()=>setIndex((currentIndex + 1) % images.length)} id="next-button" className="absolute right-1 top-1/2 -translate-y-1/2 text-white bg-gray-800 p-2 rounded-full hover:bg-gray-700 transition">
+        &#10095;
+      </button>
+    </div>
+  </div>
+ 
+ </>
+  )
+}
