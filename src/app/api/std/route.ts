@@ -67,7 +67,7 @@ export async function GET(request: Request) {
   const rollNo = searchParams.get('rollNo');
 
   const student = students.find((s) => s.rollNo === rollNo);
-  if (!student) {
+  if (!student && rollNo) {
     return NextResponse.json({ error: 'Student not found' }, { status: 404 });
   }
 if (!rollNo) {

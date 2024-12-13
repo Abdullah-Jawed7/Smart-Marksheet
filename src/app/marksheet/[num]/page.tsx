@@ -16,6 +16,9 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import { useParams } from 'next/navigation';
 import { useStudentContext } from '@/components/hook/data';
 import Link from "next/link"
+import Image from "next/image"
+import {usePDF} from 'react-to-pdf'
+
 
 interface Question {
   obtainedMarks: string;
@@ -38,16 +41,13 @@ interface StudentInfo {
   subjects: Subject[];
 }
 
-// In-memory database for storing student information
-let students: StudentInfo[] = [];
-let studentInf:StudentInfo | undefined;
-// let studentData: StudentInfo;
 export default function StudentProfile() {
 
 
   const { studentData, setStudentData } = useStudentContext();
   const params = useParams();
   const rollNo = params.num as string;
+  const { toPDF, targetRef } = usePDF({filename: 'page.pdf'});
 
   // Fetch student data based on roll number
   useEffect(() => {
@@ -91,10 +91,12 @@ export default function StudentProfile() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
-          className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100 p-4 sm:p-6 md:p-8 lg:p-10"
+          className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100  sm:p-6 md:p-8 lg:p-10"
         >
+           <button onClick={() => toPDF()}>Download PDF</button>
           <div className="mx-auto max-w-7xl">
             <motion.div
+            ref={targetRef}
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.5 }}
@@ -126,8 +128,8 @@ export default function StudentProfile() {
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent>
-                  <div className="grid gap-6 sm:gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                <CardContent className="p-1 py-4 sm:p-3 md:p-6">
+                  <div className="grid gap-2 sm:gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                     <StudentInfo />
                     <PerformanceGraph graphType={graphType} setGraphType={setGraphType} />
                   </div>
@@ -242,13 +244,13 @@ function PerformanceGraph({ graphType, setGraphType }: { graphType: string, setG
         transition={{ delay: 0.4 }}
         className="space-y-4 md:col-span-2"
       >
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between ">
           <h3 className="text-lg font-medium">Performance Graph</h3>
-          <Select value={graphType} onValueChange={setGraphType}>
+          <Select   value={graphType} onValueChange={setGraphType}>
             <SelectTrigger className="w-[140px]">
               <SelectValue placeholder="Graph type" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white">
               <SelectItem value="bar">Bar Graph</SelectItem>
               <SelectItem value="line">Line Graph</SelectItem>
               <SelectItem value="pie">Pie Chart</SelectItem>
@@ -329,7 +331,7 @@ function SubjectOverview({ subject, graphType, setGraphType }: { subject: Subjec
     { name: 'Short Questions', percentage: shortQuestionsPercentage },
     { name: 'Long Questions', percentage: longQuestionsPercentage },
   ];
-
+  const colors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
   return (
     <motion.div 
       initial={{ opacity: 0 }}
@@ -351,13 +353,14 @@ function SubjectOverview({ subject, graphType, setGraphType }: { subject: Subjec
             <Progress value={item.percentage} className="w-full" />
           </motion.div>
         ))}
+        <Modal  selectedSubject={subject} />
       </div>
       <div className="space-y-4 sm:space-y-6">
         <Select value={graphType} onValueChange={setGraphType}>
           <SelectTrigger className="w-[140px]">
             <SelectValue placeholder="Graph type" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-white">
             <SelectItem value="bar">Bar Graph</SelectItem>
             <SelectItem value="line">Line Graph</SelectItem>
             <SelectItem value="pie">Pie Chart</SelectItem>
@@ -366,52 +369,59 @@ function SubjectOverview({ subject, graphType, setGraphType }: { subject: Subjec
         </Select>
         <div className="h-[200px] sm:h-[250px] md:h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
-          {(
-          ()=>{
-          if (graphType === "bar" ) {
-            return(
-              <BarChart data={data}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="percentage" fill="#8884d8" />
-              </BarChart>
-              )
-          }
-           else if (graphType === "line") {
-            return(
-              <LineChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Line type="monotone" dataKey="percentage" stroke="#8884d8" />
-            </LineChart>)
-           }
-           else if (graphType === "pie") {
-            return(  <PieChart>
-              <Pie dataKey="percentage" nameKey="name" data={data} fill="#8884d8" label />
-              <Tooltip />
-            </PieChart>)
-           }
-           else if (graphType === "radar") {
-            return(
-              <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data}>
-                <PolarGrid />
-                <PolarAngleAxis dataKey="name" />
-                <PolarRadiusAxis angle={30} domain={[0, 100]} />
-                <Radar name="Percentage" dataKey="percentage" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
-                <Legend />
-              </RadarChart>
-            )
-           }else{
-            return <div>first select chart type</div>; 
-           }
-          })()
-           }
+          {(() => {
+              if (graphType === "bar") {
+                return (
+                  <BarChart data={data}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="percentage" fill="#8884d8">
+                      {data.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                )
+              } else if (graphType === "line") {
+                return (
+                  <LineChart data={data}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Line type="monotone" dataKey="percentage" stroke="#8884d8" strokeWidth={2} dot={{ stroke: '#8884d8', strokeWidth: 2, r: 4 }} activeDot={{ r: 8 }} />
+                  </LineChart>
+                )
+              } else if (graphType === "pie") {
+                return (
+                  <PieChart>
+                    <Pie dataKey="percentage" nameKey="name" data={data} fill="#8884d8" label>
+                      {data.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                  </PieChart>
+                )
+              } else if (graphType === "radar") {
+                return (
+                  <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data}>
+                    <PolarGrid />
+                    <PolarAngleAxis dataKey="name" />
+                    <PolarRadiusAxis angle={30} domain={[0, 100]} />
+                    <Radar name="Percentage" dataKey="percentage" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
+                    <Legend />
+                  </RadarChart>
+                )
+              } else {
+                return <div>Please select a chart type</div>;
+              }
+            })()}
          
            
           </ResponsiveContainer>
@@ -436,7 +446,7 @@ function QuestionAnalysis({ type, questions, graphType, setGraphType }: { type: 
         </CardTitle>
       </CardHeader>
       
-      <CardContent>
+      <CardContent  className="p-1 sm:p-3 md:p-6">
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -464,7 +474,7 @@ function QuestionAnalysis({ type, questions, graphType, setGraphType }: { type: 
               <SelectTrigger className="w-[140px]">
                 <SelectValue placeholder="Graph type" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 <SelectItem value="bar">Bar Graph</SelectItem>
                 <SelectItem value="line">Line Graph</SelectItem>
                 <SelectItem value="pie">Pie Chart</SelectItem>
@@ -638,20 +648,21 @@ function MoreDetails({ showDetails, setShowDetails, selectedSubject, setSelected
     <div className="mt-6">
       <Button 
         variant="outline" 
+        className="w-full sm:w-auto mb-2 sm:mb-0  sm:mr-4"
+      >
+       <Link href={`/sheet/${studentData.rollNo}`}> 
+       <span>Marksheet</span></Link>
+        
+      </Button>
+      <Button 
+        variant="outline" 
         className="w-full sm:w-auto"
         onClick={() => setShowDetails(!showDetails)}
       >
         <span>{showDetails ? 'Hide Details' : 'More Details'}</span>
         <ChevronDown className={`ml-2 h-4 w-4 transition-transform ${showDetails ? 'rotate-180' : ''}`} />
       </Button>
-      <Button 
-        variant="outline" 
-        className="w-1/2 sm:w-auto ml-4"
-      >
-       <Link href={`/sheet/${studentData.rollNo}`}> 
-       <span>Marksheet</span></Link>
-        
-      </Button>
+      
       <AnimatePresence>
         {showDetails && (
           <motion.div
@@ -659,7 +670,7 @@ function MoreDetails({ showDetails, setShowDetails, selectedSubject, setSelected
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
-            className="mt-4 grid gap-4 sm:grid-cols-3 "
+            className="mt-4 grid gap-4 grid-cols-1 sm:grid-cols-3 "
           >
             <SubjectPerformance handleSubjectClick={handleSubjectClick} />
             <SubjectAnalysis 
@@ -734,7 +745,7 @@ setSelectedSubject: (subject: Subject | null) => void,
                 </Button>
               </motion.div>
             </CardHeader>
-            <CardContent>
+            <CardContent  className="p-1 sm:p-3 md:p-6">
               <Tabs defaultValue="overview" className="w-full">
                 <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -1056,3 +1067,68 @@ return (
 </Card>
 )
 }
+
+
+
+function Modal({ selectedSubject, }:
+  { selectedSubject: Subject | null,
+  })
+  {
+  
+    
+    const [modal ,setModal ] =useState(false)
+    const [index ,setIndex ] =useState(0)
+    const [image ,setImage ] =useState('/math2.jpg')
+  
+  
+  let images :string[] = [];
+  let selectImages: { [key: string]: string[] } = {
+    maths:['/math2.jpg'],
+    urdu:['/urdu1.jpg','/urdu2.jpg','/urdu3.jpg'],
+    computer:['/computer2.jpg'],
+    english:['/english1.jpg' ,'/english2.jpg'],
+    islamiat:['islamiat1.jpg','/islamiat2.jpg'],
+    physics:['/physics1.jpg' ,'/physics2.jpg']
+  }
+  
+  useEffect(()=>{
+    let sub =selectedSubject?.name
+   let img = selectImages[`${sub?.toLowerCase()}`]  
+   img?.forEach((i)=>images.push(i))
+  console.log(images);
+  console.log(images[index]);
+  setImage(images[index])
+  },[images ,selectedSubject , modal,index])
+  
+  
+    return(
+  
+      <>
+    <button onClick={()=>setModal(!modal)} id="open-carousel" className="px-5 py-1 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition">
+     Exam Paper
+    </button>
+  
+   
+    <div id="modal" className={`${modal ? 'flex' :'hidden'}  fixed inset-0  bg-black bg-opacity-60  items-center justify-center z-50 `}>
+      <div className="relative bg-white rounded-lg p-4 max-w-3xl w-full h-auto flex flex-col items-center">
+        {/* <!-- Close Button --> */}
+        <button onClick={()=>setModal(!modal)} id="close-button" className="absolute top-3 right-3 text-white bg-red-500 w-8 h-8 rounded-full flex items-center justify-center hover:bg-red-600 transition">
+          &times;
+        </button>
+  
+        {/* <!-- Image --> */}
+        <Image id="modal-image" src={image} width={600} height={1000} alt="Projection" className="w-full max-h-[500px] object-contain rounded-lg shadow-md"/>
+  
+        {/* <!-- Navigation Buttons --> */}
+        <button onClick={()=>setIndex((index - 1 + images.length) % images.length)} id="prev-button" className="absolute left-1 top-1/2 -translate-y-1/2 text-white bg-gray-800 p-2 rounded-full hover:bg-gray-700 transition">
+          &#10094;
+        </button>
+        <button onClick={()=>setIndex( (index + 1) % images.length)} id="next-button" className="absolute right-1 top-1/2 -translate-y-1/2 text-white bg-gray-800 p-2 rounded-full hover:bg-gray-700 transition">
+          &#10095;
+        </button>
+      </div>
+    </div>
+   
+   </>
+    )
+  }

@@ -11,13 +11,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Progress } from "@/components/ui/progress"
 import { ChevronDown, FileText, PercentIcon, X, TrendingUp, BookOpen, Briefcase, GraduationCap, BrainCircuit } from 'lucide-react'
-import {  studentDef } from "../../utils/studentData"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts'
 import { useParams } from 'next/navigation';
 import { useStudentContext } from '@/components/hook/data';
 import Link from "next/link"
 import Image from "next/image"
-// import require from '@google/generative-ai'
+import {usePDF} from 'react-to-pdf'
 
 interface Question {
   obtainedMarks: string;
@@ -43,6 +42,21 @@ interface StudentInfo {
 
 export default function StudentProfile() {
  
+
+
+
+  
+
+  const { toPDF, targetRef } = usePDF({filename: 'page.pdf'});
+  // return (
+  //    <div>
+  //       <button onClick={() => toPDF()}>Download PDF</button>
+  //       <div >
+  //          Content to be generated to PDF
+  //       </div>
+  //    </div>
+  // )
+
 
   const { studentData, setStudentData } = useStudentContext();
   const params = useParams();
@@ -86,7 +100,10 @@ export default function StudentProfile() {
   }
 
   return (
+    <>
+     <button onClick={() => toPDF()}>Download PDF</button>
     <motion.div 
+    ref={targetRef}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
@@ -138,7 +155,7 @@ export default function StudentProfile() {
           <Details/>
         </motion.div>
       </div>
-    </motion.div>
+    </motion.div></>
   )
 }
 
@@ -328,6 +345,9 @@ function SubjectOverview({ subject, graphType, setGraphType }: { subject: Subjec
             <Progress value={item.percentage} className="w-full" />
           </motion.div>
         ))}
+        <Modal
+             selectedSubject={subject} 
+             />
       </div>
       <div className="space-y-4 sm:space-y-6">
         <Select value={graphType} onValueChange={setGraphType}>
@@ -667,10 +687,8 @@ function SubjectPerformance({ handleSubjectClick ,selectedSubject }: { handleSub
           <span className={`text-sm font-medium text-${getSubjectColor(subject.name)}-500`}>{subject.name}</span>
           <span className="text-sm">{calculateSubjectPercentage(subject).toFixed(2)}%</span>
         </motion.div>
-        <Modal
-             selectedSubject={selectedSubject} 
-             />
-         {/* <button onClick={()=>HandleModal()} >Exam Paper</button> */}
+        
+        
          </>
       ))}
     </div>
@@ -1086,7 +1104,8 @@ function getSubjectColor(subject: string): string {
     maths: "purple",
     physics: "green",
     english: "yellow",
-    islamiat: 'orange,'
+    islamiat: 'orange,',
+    chemistry: 'brown,'
   }
 
   return colors[subject.toLowerCase()] || "gray"
@@ -1232,19 +1251,18 @@ return (
 
 function Modal({ selectedSubject, }:
 { selectedSubject: Subject | null,
-  // setSelectedSubject: (subject: Subject | null) => void,
-  // handleSubjectClick: (subject: Subject) => void,
 })
 {
- 
 
-  let content ={
-    name:'urdu'
-  }
+  
+  const [modal ,setModal ] =useState(false)
+  const [index ,setIndex ] =useState(0)
+  const [image ,setImage ] =useState('/math2.jpg')
 
-  let images :string[] = [];
+
+let images :string[] = [];
 let selectImages: { [key: string]: string[] } = {
-  math:['/math2.jpg'],
+  maths:['/math2.jpg'],
   urdu:['/urdu1.jpg','/urdu2.jpg','/urdu3.jpg'],
   computer:['/computer2.jpg'],
   english:['/english1.jpg' ,'/english2.jpg'],
@@ -1253,71 +1271,24 @@ let selectImages: { [key: string]: string[] } = {
 }
 
 useEffect(()=>{
-  // let sub =selectedSubject?.name.toLowerCase
-  let sub =content?.name
-
- let img = selectImages[`${sub}`]  
- img.forEach((i)=>images.push(i))
-},[selectedSubject])
-
-
- 
-  
-  let currentIndex = 0;
-  const [modal ,setModal ] =useState(false)
-  const [index ,setIndex ] =useState(0)
-  // const modal = document.querySelector('.modal');
-  // const modalImage = document.querySelector('.modal-image');
-  // const openCarouselButton = document.getElementById('open-carousel');
-  // const closeButton = document.querySelector('.close-button');
-  // const prevButton = document.querySelector('.prev-button');
-  // const nextButton = document.querySelector('.next-button');
-  
-  // // Open the carousel
-  // openCarouselButton?.addEventListener('click', () => {
-  //   modal? = 'flex';
-  //   modalImage.src = images[currentIndex];
-  // });
-  
-  // // Close the carousel
-  // closeButton.addEventListener('click', () => {
-  //   modal.style.animation = 'fadeOut 0.3s ease-in-out';
-  //   setTimeout(() => {
-  //     modal.style.display = 'none';
-  //     modal.style.animation = ''; // Reset animation for future openings
-  //   }, 300);
-  // });
-  
-  // // Show the previous image
-  // prevButton.addEventListener('click', () => {
-  //   currentIndex = (currentIndex - 1 + images.length) % images.length;
-  //   modalImage.src = images[currentIndex];
-  // });
-  
-  // // Show the next image
-  // nextButton.addEventListener('click', () => {
-  //   currentIndex = (currentIndex + 1) % images.length;
-  //   modalImage.src = images[currentIndex];
-  // });
-  
-  // // Optional: Close the modal when clicking outside the content
-  // modal.addEventListener('click', (e) => {
-  //   if (e.target === modal) {
-  //     closeButton.click();
-  //   }
-  // });
-
+  let sub =selectedSubject?.name
+ let img = selectImages[`${sub?.toLowerCase()}`]  
+ img?.forEach((i)=>images.push(i))
+console.log(images);
+console.log(images[index]);
+setImage(images[index])
+},[images ,selectedSubject , modal,index])
 
 
   return(
 
     <>
-  <button onClick={()=>setModal(!modal)} id="open-carousel" className="px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition">
-    Open Image Carousel
+  <button onClick={()=>setModal(!modal)} id="open-carousel" className="px-5 py-1 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition">
+   Exam Paper
   </button>
 
  
-  <div id="modal" className={`${modal ? 'flex' :'hidden'}  fixed inset-0  bg-black bg-opacity-60  items-center justify-center`}>
+  <div id="modal" className={`${modal ? 'flex' :'hidden'}  fixed inset-0  bg-black bg-opacity-60  items-center justify-center z-50 `}>
     <div className="relative bg-white rounded-lg p-4 max-w-3xl w-full flex flex-col items-center">
       {/* <!-- Close Button --> */}
       <button onClick={()=>setModal(!modal)} id="close-button" className="absolute top-3 right-3 text-white bg-red-500 w-8 h-8 rounded-full flex items-center justify-center hover:bg-red-600 transition">
@@ -1325,13 +1296,13 @@ useEffect(()=>{
       </button>
 
       {/* <!-- Image --> */}
-      <Image id="modal-image" src={images[index]} width={600} height={1000} alt="Projection" className="w-full max-h-[500px] object-contain rounded-lg shadow-md"/>
+      <Image id="modal-image" src={image} width={600} height={1000} alt="Projection" className="w-full max-h-[500px] object-contain rounded-lg shadow-md"/>
 
       {/* <!-- Navigation Buttons --> */}
-      <button onClick={()=>setIndex((currentIndex - 1 + images.length) % images.length)} id="prev-button" className="absolute left-1 top-1/2 -translate-y-1/2 text-white bg-gray-800 p-2 rounded-full hover:bg-gray-700 transition">
+      <button onClick={()=>setIndex((index - 1 + images.length) % images.length)} id="prev-button" className="absolute left-1 top-1/2 -translate-y-1/2 text-white bg-gray-800 p-2 rounded-full hover:bg-gray-700 transition">
         &#10094;
       </button>
-      <button onClick={()=>setIndex((currentIndex + 1) % images.length)} id="next-button" className="absolute right-1 top-1/2 -translate-y-1/2 text-white bg-gray-800 p-2 rounded-full hover:bg-gray-700 transition">
+      <button onClick={()=>setIndex( (index + 1) % images.length)} id="next-button" className="absolute right-1 top-1/2 -translate-y-1/2 text-white bg-gray-800 p-2 rounded-full hover:bg-gray-700 transition">
         &#10095;
       </button>
     </div>
@@ -1340,3 +1311,4 @@ useEffect(()=>{
  </>
   )
 }
+
