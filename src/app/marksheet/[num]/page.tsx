@@ -836,7 +836,7 @@ function ImprovementGuidelines() {
       `;
       
       const result = await model.generateContent(prompt);
-      setDetail(<pre>{result?.response?.text()}</pre>);
+      setDetail(<pre className="whitespace-pre-wrap break-words" >{result?.response?.text()}</pre>);
     } catch (error) {
       console.log('from ai' ,error);
       
@@ -889,7 +889,7 @@ function CareerSuggestions() {
       `;
       
       const result = await model.generateContent(prompt);
-      setDetail(<pre>{result?.response?.text()}</pre>);
+      setDetail(<pre className="whitespace-pre-wrap break-words" >{result?.response?.text()}</pre>);
       // console.log(typeof( detail) , detail );
     } catch (error) {
       console.log('from ai' ,error);
@@ -1043,11 +1043,12 @@ function Details(){
       - Provide Youtube Videos and documents related every week topic to improve them.
       - Based on the analysis, suggest potential career paths considering strengths and interests.
       Here's the data: ${JSON.stringify(studentData.subjects)}.
+      Note: Dont use stars while giving response.
       
       `;
       
       const result = await model.generateContent(prompt);
-      setDetail(<pre >{result?.response?.text()}</pre>);
+      setDetail(<pre className="whitespace-pre-wrap break-words" >{result?.response?.text()}</pre>);
       console.log(detail);
       
     } catch (error) {
