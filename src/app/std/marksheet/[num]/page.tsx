@@ -1,6 +1,6 @@
 "use client"
 
-import { useState ,useEffect, JSXElementConstructor } from "react"
+import { useState ,useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -11,12 +11,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Progress } from "@/components/ui/progress"
 import { ChevronDown, FileText, PercentIcon, X, TrendingUp, BookOpen, Briefcase, GraduationCap, BrainCircuit } from 'lucide-react'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts'
+import {  studentDef } from "../../../utils/studentData"
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Cell } from 'recharts'
 import { useParams } from 'next/navigation';
 import { useStudentContext } from '@/components/hook/data';
 import Link from "next/link"
 import Image from "next/image"
 import {usePDF} from 'react-to-pdf'
+
 
 interface Question {
   obtainedMarks: string;
@@ -39,28 +41,13 @@ interface StudentInfo {
   subjects: Subject[];
 }
 
-
 export default function StudentProfile() {
- 
-
-
-
-  
-
-  const { toPDF, targetRef } = usePDF({filename: 'page.pdf'});
-  // return (
-  //    <div>
-  //       <button onClick={() => toPDF()}>Download PDF</button>
-  //       <div >
-  //          Content to be generated to PDF
-  //       </div>
-  //    </div>
-  // )
 
 
   const { studentData, setStudentData } = useStudentContext();
   const params = useParams();
-  const rollNo = params.nume as string;
+  const rollNo = params.num as string;
+  const { toPDF, targetRef } = usePDF({filename: 'page.pdf'});
 
   // Fetch student data based on roll number
   useEffect(() => {
@@ -84,7 +71,6 @@ export default function StudentProfile() {
   }
 
 
-
   const [showDetails, setShowDetails] = useState(false)
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null)
   const [selectedQuestionType, setSelectedQuestionType] = useState<string | null>(null)
@@ -100,67 +86,80 @@ export default function StudentProfile() {
   }
 
   return (
-    <>
-     <button onClick={() => toPDF()}>Download PDF</button>
-    <motion.div 
-    ref={targetRef}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 sm:p-6 md:p-8 lg:p-10"
-    >
-      <div className="mx-auto max-w-7xl">
-        <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
+   
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
-          className="space-y-6 sm:space-y-8 md:space-y-10"
+          className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100  sm:p-6 md:p-8 lg:p-10"
         >
-          <Card className="overflow-hidden">
-            <CardHeader className="pb-2 sm:pb-4">
-              <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
-                {/* <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-                  <Avatar className="h-20 w-20 sm:h-24 sm:w-24 md:h-28 md:w-28">
-                    <AvatarImage src="/placeholder.svg?height=112&width=112" alt={studentData.name} />
-                    <AvatarFallback>{studentData.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                  </Avatar>
-                </motion.div> */}
-                <div className="text-center sm:text-left">
-                  <CardTitle className="text-3xl sm:text-4xl md:text-5xl font-bold">{studentData?.name}</CardTitle>
-                  <p className="text-sm sm:text-base md:text-lg text-muted-foreground">Academic Profile</p>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-6 sm:gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-                <StudentInfo />
-                <PerformanceGraph graphType={graphType} setGraphType={setGraphType} />
-              </div>
-              <MoreDetails 
-                showDetails={showDetails} 
-                setShowDetails={setShowDetails}
-                selectedSubject={selectedSubject}
-                setSelectedSubject={setSelectedSubject}
-                handleSubjectClick={handleSubjectClick}
-                handleQuestionTypeClick={handleQuestionTypeClick}
-                graphType={graphType}
-                setGraphType={setGraphType}
-              />
-            </CardContent>
-          </Card>
-          <Summary />
-          <ResultAnalysisAndSuggestions />
-          <ImprovementGuidelines />
-          <CareerSuggestions />
-          <Details/>
+           <button onClick={() => toPDF()}>Download PDF</button>
+          <div className="mx-auto max-w-7xl">
+            <motion.div
+            ref={targetRef}
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.5 }}
+              className="space-y-6 sm:space-y-8 md:space-y-10"
+            >
+              <Card className=" p-3 overflow-hidden bg-white/80 backdrop-blur-sm">
+                <CardHeader className="pb-2 sm:pb-4">
+                  <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+                    <motion.div 
+                      whileHover={{ scale: 1.1 }} 
+                      whileTap={{ scale: 0.9 }}
+                      className="relative"
+                    >
+                      <Avatar className="h-20 w-20 sm:h-24 sm:w-24 md:h-28 md:w-28 ring-2 ring-purple-500 ring-offset-2">
+                        <AvatarImage src="/placeholder.svg?height=112&width=112" alt={studentData.name} />
+                        <AvatarFallback>{studentData.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                      </Avatar>
+                      <motion.div 
+                        className="absolute -top-1 -right-1 bg-green-500 rounded-full p-1"
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{ repeat: Infinity, duration: 2 }}
+                      >
+                        <PercentIcon className="h-4 w-4 text-white" />
+                      </motion.div>
+                    </motion.div>
+                    <div className="text-center sm:text-left">
+                      <CardTitle className="text-3xl sm:text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600">{studentData?.name}</CardTitle>
+                      <p className="text-sm sm:text-base md:text-lg text-muted-foreground">Academic Profile</p>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-1 py-4 sm:p-3 md:p-6">
+                  <div className="grid gap-2 sm:gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                    <StudentInfo />
+                    <PerformanceGraph graphType={graphType} setGraphType={setGraphType} />
+                  </div>
+                  <MoreDetails 
+                    showDetails={showDetails} 
+                    setShowDetails={setShowDetails}
+                    selectedSubject={selectedSubject}
+                    setSelectedSubject={setSelectedSubject}
+                    handleSubjectClick={handleSubjectClick}
+                    handleQuestionTypeClick={handleQuestionTypeClick}
+                    graphType={graphType}
+                    setGraphType={setGraphType}
+                  />
+                </CardContent>
+              </Card>
+              <Summary />
+              <ResultAnalysisAndSuggestions />
+              <ImprovementGuidelines />
+              <CareerSuggestions />
+              <Details/>
+            </motion.div>
+          </div>
         </motion.div>
-      </div>
-    </motion.div></>
+      
   )
+
 }
 
 function StudentInfo() {
-  const { studentData  } = useStudentContext();
+  const { studentData } = useStudentContext();
   return (
     <>
     <motion.div 
@@ -179,9 +178,9 @@ function StudentInfo() {
         <div className="grid grid-cols-2 gap-2 text-sm">
           <InfoItem label="Grade:" value={calculateOverallGrade()} />
           <InfoItem label="Percentage:" value={`${calculateOverallPercentage().toFixed(2)}%`} />
+          <InfoItem label="Percentile:" value={`${(calculateOverallPercentage() -4).toFixed(2) }%`} />
         </div>
       </div>
-      <div className="btn"><button className="h-8 w-24 ">MarkSheet</button></div>
     <SubjectList/>
     </motion.div>
     </>
@@ -189,6 +188,7 @@ function StudentInfo() {
 }
 
 function InfoItem({ label, value }: { label: string, value: string }) {
+ 
   return (
     <div>
       <p className="text-muted-foreground">{label}</p>
@@ -230,90 +230,98 @@ function SubjectList() {
 
 function PerformanceGraph({ graphType, setGraphType }: { graphType: string, setGraphType: (type: string) => void }) {
   const { studentData } = useStudentContext();
-  const data = studentData?.subjects.map(subject => ({
-    name: subject.name,
-    percentage: calculateSubjectPercentage(subject).toFixed(2)
-  }));
-console.log(graphType);
-
-  return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.4 }}
-      className="space-y-4 md:col-span-2"
-    >
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium">Performance Graph</h3>
-        <Select value={graphType} onValueChange={setGraphType}>
-          <SelectTrigger className="w-[140px]">
-            <SelectValue placeholder="Graph type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="bar">Bar Graph</SelectItem>
-            <SelectItem value="line">Line Graph</SelectItem>
-            <SelectItem value="pie">Pie Chart</SelectItem>
-            <SelectItem value="radar">Radar Chart</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="h-[200px] sm:h-[250px] md:h-[300px]">
-         
-        <ResponsiveContainer width="100%" height="100%">
-         
-          {(
-          ()=>{
-          if (graphType === "bar" ) {
-            return(
-               <BarChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="percentage" fill="#8884d8" />
-            </BarChart>)
-          }
-           else if (graphType === "line") {
-            return(
-            <LineChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Line type="monotone" dataKey="percentage" stroke="#8884d8" />
-          </LineChart>)
-           }
-           else if (graphType === "pie") {
-            return(  <PieChart>
-              <Pie dataKey="percentage" nameKey="name" data={data} fill="#8884d8" label />
-              <Tooltip />
-            </PieChart>)
-           }
-           else if (graphType === "radar") {
-            return(
-              <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data}>
-              <PolarGrid />
-              <PolarAngleAxis dataKey="name" />
-              <PolarRadiusAxis angle={30} domain={[0, 100]} />
-              <Radar name="Percentage" dataKey="percentage" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
-              <Legend />
-            </RadarChart>
-            )
-           }else{
-            return <div>first select chart type</div>; 
-           }
-          })()
-           }
-         
-        </ResponsiveContainer>
-      </div>
-    </motion.div>
-  )
-}
+    const data = studentData?.subjects.map(subject => ({
+      name: subject.name,
+      percentage: calculateSubjectPercentage(subject).toFixed(2)
+    }));
+  
+    const colors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+  
+    return (
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        className="space-y-4 md:col-span-2"
+      >
+        <div className="flex items-center justify-between ">
+          <h3 className="text-lg font-medium">Performance Graph</h3>
+          <Select   value={graphType} onValueChange={setGraphType}>
+            <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder="Graph type" />
+            </SelectTrigger>
+            <SelectContent className="bg-white">
+              <SelectItem value="bar">Bar Graph</SelectItem>
+              <SelectItem value="line">Line Graph</SelectItem>
+              <SelectItem value="pie">Pie Chart</SelectItem>
+              <SelectItem value="radar">Radar Chart</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="h-[200px] sm:h-[250px] md:h-[300px]">
+          <ResponsiveContainer width="100%" height="100%">
+            {(() => {
+              if (graphType === "bar") {
+                return (
+                  <BarChart data={data}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="percentage" fill="#8884d8">
+                      {data.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                )
+              } else if (graphType === "line") {
+                return (
+                  <LineChart data={data}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Line type="monotone" dataKey="percentage" stroke="#8884d8" strokeWidth={2} dot={{ stroke: '#8884d8', strokeWidth: 2, r: 4 }} activeDot={{ r: 8 }} />
+                  </LineChart>
+                )
+              } else if (graphType === "pie") {
+                return (
+                  <PieChart>
+                    <Pie dataKey="percentage" nameKey="name" data={data} fill="#8884d8" label>
+                      {data.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                  </PieChart>
+                )
+              } else if (graphType === "radar") {
+                return (
+                  <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data}>
+                    <PolarGrid />
+                    <PolarAngleAxis dataKey="name" />
+                    <PolarRadiusAxis angle={30} domain={[0, 100]} />
+                    <Radar name="Percentage" dataKey="percentage" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
+                    <Legend />
+                  </RadarChart>
+                )
+              } else {
+                return <div>Please select a chart type</div>;
+              }
+            })()}
+          </ResponsiveContainer>
+        </div>
+      </motion.div>
+    )
+  }
+  
 
 function SubjectOverview({ subject, graphType, setGraphType }: { subject: Subject, graphType: string, setGraphType: (type: string) => void }) {
+  const { studentData } = useStudentContext();
   const mcqPercentage = (parseInt(subject.mcq.obtained) / parseInt(subject.mcq.total)) * 100;
   const shortQuestionsPercentage = calculateQuestionTypePercentage(subject.shortQuestions);
   const longQuestionsPercentage = calculateQuestionTypePercentage(subject.longQuestions);
@@ -323,7 +331,7 @@ function SubjectOverview({ subject, graphType, setGraphType }: { subject: Subjec
     { name: 'Short Questions', percentage: shortQuestionsPercentage },
     { name: 'Long Questions', percentage: longQuestionsPercentage },
   ];
-
+  const colors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
   return (
     <motion.div 
       initial={{ opacity: 0 }}
@@ -345,16 +353,14 @@ function SubjectOverview({ subject, graphType, setGraphType }: { subject: Subjec
             <Progress value={item.percentage} className="w-full" />
           </motion.div>
         ))}
-        <Modal
-             selectedSubject={subject} 
-             />
+        <Modal  selectedSubject={subject} />
       </div>
       <div className="space-y-4 sm:space-y-6">
         <Select value={graphType} onValueChange={setGraphType}>
           <SelectTrigger className="w-[140px]">
             <SelectValue placeholder="Graph type" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-white">
             <SelectItem value="bar">Bar Graph</SelectItem>
             <SelectItem value="line">Line Graph</SelectItem>
             <SelectItem value="pie">Pie Chart</SelectItem>
@@ -363,52 +369,59 @@ function SubjectOverview({ subject, graphType, setGraphType }: { subject: Subjec
         </Select>
         <div className="h-[200px] sm:h-[250px] md:h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
-          {(
-          ()=>{
-          if (graphType === "bar" ) {
-            return(
-              <BarChart data={data}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="percentage" fill="#8884d8" />
-              </BarChart>
-              )
-          }
-           else if (graphType === "line") {
-            return(
-              <LineChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Line type="monotone" dataKey="percentage" stroke="#8884d8" />
-            </LineChart>)
-           }
-           else if (graphType === "pie") {
-            return(  <PieChart>
-              <Pie dataKey="percentage" nameKey="name" data={data} fill="#8884d8" label />
-              <Tooltip />
-            </PieChart>)
-           }
-           else if (graphType === "radar") {
-            return(
-              <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data}>
-                <PolarGrid />
-                <PolarAngleAxis dataKey="name" />
-                <PolarRadiusAxis angle={30} domain={[0, 100]} />
-                <Radar name="Percentage" dataKey="percentage" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
-                <Legend />
-              </RadarChart>
-            )
-           }else{
-            return <div>first select chart type</div>; 
-           }
-          })()
-           }
+          {(() => {
+              if (graphType === "bar") {
+                return (
+                  <BarChart data={data}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="percentage" fill="#8884d8">
+                      {data.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                )
+              } else if (graphType === "line") {
+                return (
+                  <LineChart data={data}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Line type="monotone" dataKey="percentage" stroke="#8884d8" strokeWidth={2} dot={{ stroke: '#8884d8', strokeWidth: 2, r: 4 }} activeDot={{ r: 8 }} />
+                  </LineChart>
+                )
+              } else if (graphType === "pie") {
+                return (
+                  <PieChart>
+                    <Pie dataKey="percentage" nameKey="name" data={data} fill="#8884d8" label>
+                      {data.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                  </PieChart>
+                )
+              } else if (graphType === "radar") {
+                return (
+                  <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data}>
+                    <PolarGrid />
+                    <PolarAngleAxis dataKey="name" />
+                    <PolarRadiusAxis angle={30} domain={[0, 100]} />
+                    <Radar name="Percentage" dataKey="percentage" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
+                    <Legend />
+                  </RadarChart>
+                )
+              } else {
+                return <div>Please select a chart type</div>;
+              }
+            })()}
          
            
           </ResponsiveContainer>
@@ -419,11 +432,12 @@ function SubjectOverview({ subject, graphType, setGraphType }: { subject: Subjec
 }
 
 function QuestionAnalysis({ type, questions, graphType, setGraphType }: { type: string, questions: { obtainedMarks: string, totalMarks: string, topic: string }[], graphType: string, setGraphType: (type: string) => void }) {
+  const { studentData } = useStudentContext();
   const data = questions.map(q => ({
     topic: q.topic,
-    percentage: ((parseInt(q.obtainedMarks) / parseInt(q.totalMarks)) * 100).toFixed(2)
+    percentage: (parseInt(q.obtainedMarks) / parseInt(q.totalMarks)) * 100
   }));
-
+  const colors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
   return (
     <Card className="mt-4 sm:mt-6">
       <CardHeader className="pb-2 sm:pb-4">
@@ -432,7 +446,7 @@ function QuestionAnalysis({ type, questions, graphType, setGraphType }: { type: 
         </CardTitle>
       </CardHeader>
       
-      <CardContent>
+      <CardContent  className="p-1 sm:p-3 md:p-6">
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -460,7 +474,7 @@ function QuestionAnalysis({ type, questions, graphType, setGraphType }: { type: 
               <SelectTrigger className="w-[140px]">
                 <SelectValue placeholder="Graph type" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 <SelectItem value="bar">Bar Graph</SelectItem>
                 <SelectItem value="line">Line Graph</SelectItem>
                 <SelectItem value="pie">Pie Chart</SelectItem>
@@ -468,54 +482,61 @@ function QuestionAnalysis({ type, questions, graphType, setGraphType }: { type: 
               </SelectContent>
             </Select>
             <div className="h-[300px] sm:h-[350px] md:h-[400px]">
-              <ResponsiveContainer width="100%" height="100%">
-              {(
-          ()=>{
-          if (graphType === "bar" ) {
-            return(
-              <BarChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="topic" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="percentage" fill="#8884d8" />
-            </BarChart>)
-          }
-           else if (graphType === "line") {
-            return(
-              <LineChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="topic" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Line type="monotone" dataKey="percentage" stroke="#8884d8" />
-            </LineChart>)
-           }
-           else if (graphType === "pie") {
-            return(  <PieChart>
-              <Pie dataKey="percentage" nameKey="topic" data={data} fill="#8884d8" label />
-              <Tooltip />
-            </PieChart>)
-           }
-           else if (graphType === "radar") {
-            return(
-              <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data}>
+            <ResponsiveContainer width="100%" height="100%">
+            {(() => {
+              if (graphType === "bar") {
+                return (
+                  <BarChart data={data}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="percentage" fill="#8884d8">
+                      {data.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                )
+              } else if (graphType === "line") {
+                return (
+                  <LineChart data={data}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Line type="monotone" dataKey="percentage" stroke="#8884d8" strokeWidth={2} dot={{ stroke: '#8884d8', strokeWidth: 2, r: 4 }} activeDot={{ r: 8 }} />
+                  </LineChart>
+                )
+              } else if (graphType === "pie") {
+                return (
+                  <PieChart>
+                    <Pie dataKey="percentage" nameKey="name" data={data} fill="#8884d8" label>
+                      {data.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                  </PieChart>
+                )
+              } else if (graphType === "radar") {
+                return (
+                  <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data}>
                     <PolarGrid />
-                    <PolarAngleAxis dataKey="topic" />
+                    <PolarAngleAxis dataKey="name" />
                     <PolarRadiusAxis angle={30} domain={[0, 100]} />
                     <Radar name="Percentage" dataKey="percentage" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
                     <Legend />
                   </RadarChart>
-            )
-           }else{
-            return <div>first select chart type</div>; 
-           }
-          })()
-           }
-         
-              </ResponsiveContainer>
+                )
+              } else {
+                return <div>Please select a chart type</div>;
+              }
+            })()}
+          </ResponsiveContainer>
             </div>
           </div>
         </motion.div>
@@ -525,6 +546,7 @@ function QuestionAnalysis({ type, questions, graphType, setGraphType }: { type: 
 }
 
 function ResultAnalysisAndSuggestions() {
+  const { studentData } = useStudentContext();
   const weakTopics = identifyWeakTopics();
 
   return (
@@ -620,11 +642,18 @@ function MoreDetails({ showDetails, setShowDetails, selectedSubject, setSelected
   handleSubjectClick: (subject: Subject) => void,
   handleQuestionTypeClick: (type: string) => void,
   graphType: string, setGraphType: (type: string) => void 
-  
 }) {
   const { studentData } = useStudentContext();
   return (
     <div className="mt-6">
+      <Button 
+        variant="outline" 
+        className="w-full sm:w-auto mb-2 sm:mb-0  sm:mr-4"
+      >
+       <Link href={`/sheet/${studentData.rollNo}`}> 
+       <span>Marksheet</span></Link>
+        
+      </Button>
       <Button 
         variant="outline" 
         className="w-full sm:w-auto"
@@ -633,15 +662,7 @@ function MoreDetails({ showDetails, setShowDetails, selectedSubject, setSelected
         <span>{showDetails ? 'Hide Details' : 'More Details'}</span>
         <ChevronDown className={`ml-2 h-4 w-4 transition-transform ${showDetails ? 'rotate-180' : ''}`} />
       </Button>
-      <Button 
-        variant="outline" 
-        className="w-1/2 sm:w-auto ml-4"
-      >
-       <Link href={`/sheet/${studentData.rollNo}`}> 
-       <span>Marksheet</span></Link>
-        
-      </Button>
-
+      
       <AnimatePresence>
         {showDetails && (
           <motion.div
@@ -649,9 +670,9 @@ function MoreDetails({ showDetails, setShowDetails, selectedSubject, setSelected
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
-            className="mt-4 grid gap-4 sm:grid-cols-3 "
+            className="mt-4 grid gap-4 grid-cols-1 sm:grid-cols-3 "
           >
-            <SubjectPerformance handleSubjectClick={handleSubjectClick} selectedSubject={selectedSubject} />
+            <SubjectPerformance handleSubjectClick={handleSubjectClick} />
             <SubjectAnalysis 
               selectedSubject={selectedSubject} 
               setSelectedSubject={setSelectedSubject}
@@ -660,7 +681,6 @@ function MoreDetails({ showDetails, setShowDetails, selectedSubject, setSelected
               setGraphType={setGraphType}
 
             />
-            
           </motion.div>
         )}
       </AnimatePresence>
@@ -668,32 +688,28 @@ function MoreDetails({ showDetails, setShowDetails, selectedSubject, setSelected
   )
 }
 
-function SubjectPerformance({ handleSubjectClick ,selectedSubject }: { handleSubjectClick: (subject: Subject) => void , selectedSubject: Subject | null,
- }) {
+
+function SubjectPerformance({ handleSubjectClick }: { handleSubjectClick: (subject: Subject) => void }) {
   const { studentData } = useStudentContext();
+   return (
+      <div className="space-y-3 rounded-lg border p-4 bg-white/50 backdrop-blur-sm">
+        {studentData.subjects.map((subject, index: number) => (
+          <motion.div
+            key={subject.name}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1 * index }}
+            className="flex items-center justify-between cursor-pointer hover:bg-gray-50 p-2 rounded-md transition-colors duration-200"
+            onClick={() => handleSubjectClick(subject)}
+          >
+            <span className={`text-sm font-medium text-${getSubjectColor(subject.name)}-500`}>{subject.name}</span>
+            <span className="text-sm font-semibold">{calculateSubjectPercentage(subject).toFixed(2)}%</span>
+          </motion.div>
+        ))}
+      </div>
+    )
+  }
   
-  return (
-    <div className="space-y-3 rounded-lg border p-4">
-      {studentData.subjects.map((subject, index: number) => (
-        <>
-        <motion.div
-          key={subject.name}
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.1 * index }}
-          className="flex items-center justify-between cursor-pointer hover:bg-gray-50 p-2 rounded-md"
-          onClick={() => handleSubjectClick(subject)}
-        >
-          <span className={`text-sm font-medium text-${getSubjectColor(subject.name)}-500`}>{subject.name}</span>
-          <span className="text-sm">{calculateSubjectPercentage(subject).toFixed(2)}%</span>
-        </motion.div>
-        
-        
-         </>
-      ))}
-    </div>
-  )
-}
 
 function SubjectAnalysis({ selectedSubject, setSelectedSubject, handleQuestionTypeClick , graphType, setGraphType}: {
   selectedSubject: Subject | null,
@@ -729,7 +745,7 @@ setSelectedSubject: (subject: Subject | null) => void,
                 </Button>
               </motion.div>
             </CardHeader>
-            <CardContent>
+            <CardContent  className="p-1 sm:p-3 md:p-6">
               <Tabs defaultValue="overview" className="w-full">
                 <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -757,15 +773,11 @@ setSelectedSubject: (subject: Subject | null) => void,
 
 
 function Summary() {
-  const overallPercentage = calculateOverallPercentage();
-  const strengths = identifyStrengths();
-  const weaknesses = identifyWeaknesses();
-
-  const [detail ,setDetail] =useState<JSX.Element>()
+  // const overallPercentage = calculateOverallPercentage();
+  // const strengths = identifyStrengths();
+  // const weaknesses = identifyWeaknesses();
   const { studentData } = useStudentContext();
- 
-
-  
+  const [detail ,setDetail] =useState<JSX.Element>()
   const fetchStudentData = async () => {
     try {
       const { GoogleGenerativeAI } = require("@google/generative-ai");
@@ -797,13 +809,7 @@ fetchStudentData()
             <BookOpen className="h-5 w-5" />
             <h2 className="text-xl font-semibold">Summary</h2>
           </div>
-          {detail && (detail)}
-         {!detail && (
-          <p className="text-muted-foreground">
-            {studentData?.name} is a {getPerformanceLevel(overallPercentage)} student with an overall percentage of {overallPercentage.toFixed(2)}%. 
-            Their strengths lie particularly in {strengths?.join(', ')}, while there's room for improvement in {weaknesses?.join(', ')}.
-          </p>
-        )}
+        {detail}
         </div>
       </CardContent>
     </Card>
@@ -811,101 +817,9 @@ fetchStudentData()
 }
 
 function ImprovementGuidelines() {
+  const { studentData } = useStudentContext();
   const weaknesses = identifyWeaknesses();
-  // const { studentData } = useStudentContext();  
   const [detail ,setDetail] =useState<JSX.Element>(<pre></pre>)
-
-  let studentData ={
-    name: "Abdul Hadi",
-    rollNo: "1398",
-    class: "11",
-    group: "science",
-    subjects: [
-      {
-        name: "Computer",
-        mcq: { obtained: "20", total: "20" },
-        shortQuestions: [
-          { obtainedMarks: "3", totalMarks: "5", topic: "Network" },
-          { obtainedMarks: "4", totalMarks: "5", topic: "Architecture" },
-          { obtainedMarks: "4.5", totalMarks: "5", topic: "Topology" },
-          { obtainedMarks: "4", totalMarks: "5", topic: "Input Devices" },
-          { obtainedMarks: "4", totalMarks: "5", topic: "Algorithms" }
-        ],
-        longQuestions: [
-          { obtainedMarks: "8", totalMarks: "10", topic: "Security" },
-          { obtainedMarks: "9", totalMarks: "10", topic: "OSI Model" },
-          { obtainedMarks: "9.5", totalMarks: "10", topic: "Storage Devices" }
-        ]
-      },
-      {
-        name: "Chemistry",
-        mcq: { obtained: "10", total: "10" },
-        shortQuestions: [
-          { obtainedMarks: "4", totalMarks: "5", topic: "organic" },
-          { obtainedMarks: "4.5", totalMarks: "5", topic: "chemical substance" },
-          { obtainedMarks: "3", totalMarks: "5", topic: "instrument errors" },
-          { obtainedMarks: "5", totalMarks: "5", topic: "BioChemistry" },
-          { obtainedMarks: "5", totalMarks: "5", topic: "Minerals" }
-        ],
-        longQuestions: [
-          { obtainedMarks: "10", totalMarks: "10", topic: "Sugar Preparation" },
-          { obtainedMarks: "9", totalMarks: "10", topic: "Types of Chemistry" },
-          
-        ]
-      },
-      {
-        name: "Maths",
-        mcq: { obtained: "10", total: "10" },
-        shortQuestions: [
-          { obtainedMarks: "4", totalMarks: "5", topic: "Trigonometry" },
-          { obtainedMarks: "4.5", totalMarks: "5", topic: "Matrices" },
-          { obtainedMarks: "3", totalMarks: "5", topic: "Algebra" },
-          { obtainedMarks: "5", totalMarks: "5", topic: "Statistics" },
-          { obtainedMarks: "5", totalMarks: "5", topic: "Vectors" }
-        ],
-        longQuestions: [
-          { obtainedMarks: "10", totalMarks: "10", topic: "Graph" },
-          { obtainedMarks: "9", totalMarks: "10", topic: "Trigonometry" },
-          { obtainedMarks: "9.5", totalMarks: "10", topic: "Scalar" }
-        ]
-      },
-      {
-        name: "Physics",
-        mcq: { obtained: "10", total: "10" },
-        shortQuestions: [
-          { obtainedMarks: "4", totalMarks: "5", topic: "Projectile Motion" },
-          { obtainedMarks: "3", totalMarks: "5", topic: "Vectors" },
-          { obtainedMarks: "4", totalMarks: "5", topic: "Scalars" },
-          { obtainedMarks: "4.5", totalMarks: "5", topic: "Errors" },
-          { obtainedMarks: "2.5", totalMarks: "5", topic: "Significant Figures" },
-          { obtainedMarks: "4", totalMarks: "5", topic: "Motion" }
-        ],
-        longQuestions: [
-          { obtainedMarks: "10", totalMarks: "10", topic: "Circular Motion" },
-          { obtainedMarks: "9", totalMarks: "10", topic: "Linear Motion" },
-          { obtainedMarks: "9.5", totalMarks: "10", topic: "Laws Of Motion" }
-        ]
-      },
-      {
-        name: "English",
-        mcq: { obtained: "20", total: "20" },
-        shortQuestions: [
-          { obtainedMarks: "5", totalMarks: "5", topic: "Tenses" },
-          { obtainedMarks: "4.5", totalMarks: "5", topic: "Active Passive" },
-          { obtainedMarks: "2", totalMarks: "5", topic: "Don't Quit (poem)" },
-          { obtainedMarks: "3", totalMarks: "5", topic: "Ozymandias (poem)" },
-          { obtainedMarks: "3.5", totalMarks: "5", topic: "Choosing A Career(chapter)" }
-        ],
-        longQuestions: [
-          { obtainedMarks: "10", totalMarks: "10", topic: "Essay" },
-          { obtainedMarks: "9.5", totalMarks: "10", topic: "CV Writing" },
-          { obtainedMarks: "9.5", totalMarks: "10", topic: "Application" }
-        ]
-      }
-    ]
-  };
-
-  
   const fetchStudentData = async () => {
     try {
       const { GoogleGenerativeAI } = require("@google/generative-ai");
@@ -922,33 +836,32 @@ function ImprovementGuidelines() {
       `;
       
       const result = await model.generateContent(prompt);
-      setDetail(<pre>{result?.response?.text()}</pre>);
+      setDetail(<pre className="whitespace-pre-wrap break-words" >{result?.response?.text()}</pre>);
     } catch (error) {
       console.log('from ai' ,error);
       
     }
   }
 fetchStudentData()
-// JSON.parse(detail).map()
   return (
     <Card>
       <CardContent className="pt-6">
-        <div className="space-y-4 overflow-auto">
+        <div className="space-y-4">
           <div className="flex items-center gap-2">
             <GraduationCap className="h-5 w-5" />
             <h2 className="text-xl font-semibold">Guidelines for Improvement</h2>
           </div>
-          {detail}
-          {/* <Accordion type="single" collapsible className="w-full">
-            {weaknesses?.map((weakness, index) => (
+          <Accordion type="single" collapsible className="w-full overflow-auto">
+            {detail}
+            {/* {weaknesses?.map((weakness, index) => (
               <AccordionItem key={index} value={`item-${index}`}>
                 <AccordionTrigger>Improve {weakness}</AccordionTrigger>
                 <AccordionContent>
                   {getImprovementSuggestion(weakness)}
                 </AccordionContent>
               </AccordionItem>
-            ))}
-          </Accordion> */}
+            ))} */}
+          </Accordion>
         </div>
       </CardContent>
     </Card>
@@ -956,101 +869,11 @@ fetchStudentData()
 }
 
 function CareerSuggestions() {
+  const { studentData } = useStudentContext();
   const strengths = identifyStrengths();
   const careers = getCareerSuggestions(strengths);
-  
   const [detail ,setDetail] =useState<JSX.Element>(<pre></pre>)
-  let studentData ={
-    name: "Abdul Hadi",
-    rollNo: "1398",
-    class: "11",
-    group: "science",
-    subjects: [
-      {
-        name: "Computer",
-        mcq: { obtained: "20", total: "20" },
-        shortQuestions: [
-          { obtainedMarks: "3", totalMarks: "5", topic: "Network" },
-          { obtainedMarks: "4", totalMarks: "5", topic: "Architecture" },
-          { obtainedMarks: "4.5", totalMarks: "5", topic: "Topology" },
-          { obtainedMarks: "4", totalMarks: "5", topic: "Input Devices" },
-          { obtainedMarks: "4", totalMarks: "5", topic: "Algorithms" }
-        ],
-        longQuestions: [
-          { obtainedMarks: "8", totalMarks: "10", topic: "Security" },
-          { obtainedMarks: "9", totalMarks: "10", topic: "OSI Model" },
-          { obtainedMarks: "9.5", totalMarks: "10", topic: "Storage Devices" }
-        ]
-      },
-      {
-        name: "Chemistry",
-        mcq: { obtained: "10", total: "10" },
-        shortQuestions: [
-          { obtainedMarks: "4", totalMarks: "5", topic: "organic" },
-          { obtainedMarks: "4.5", totalMarks: "5", topic: "chemical substance" },
-          { obtainedMarks: "3", totalMarks: "5", topic: "instrument errors" },
-          { obtainedMarks: "5", totalMarks: "5", topic: "BioChemistry" },
-          { obtainedMarks: "5", totalMarks: "5", topic: "Minerals" }
-        ],
-        longQuestions: [
-          { obtainedMarks: "10", totalMarks: "10", topic: "Sugar Preparation" },
-          { obtainedMarks: "9", totalMarks: "10", topic: "Types of Chemistry" },
-          
-        ]
-      },
-      {
-        name: "Maths",
-        mcq: { obtained: "10", total: "10" },
-        shortQuestions: [
-          { obtainedMarks: "4", totalMarks: "5", topic: "Trigonometry" },
-          { obtainedMarks: "4.5", totalMarks: "5", topic: "Matrices" },
-          { obtainedMarks: "3", totalMarks: "5", topic: "Algebra" },
-          { obtainedMarks: "5", totalMarks: "5", topic: "Statistics" },
-          { obtainedMarks: "5", totalMarks: "5", topic: "Vectors" }
-        ],
-        longQuestions: [
-          { obtainedMarks: "10", totalMarks: "10", topic: "Graph" },
-          { obtainedMarks: "9", totalMarks: "10", topic: "Trigonometry" },
-          { obtainedMarks: "9.5", totalMarks: "10", topic: "Scalar" }
-        ]
-      },
-      {
-        name: "Physics",
-        mcq: { obtained: "10", total: "10" },
-        shortQuestions: [
-          { obtainedMarks: "4", totalMarks: "5", topic: "Projectile Motion" },
-          { obtainedMarks: "3", totalMarks: "5", topic: "Vectors" },
-          { obtainedMarks: "4", totalMarks: "5", topic: "Scalars" },
-          { obtainedMarks: "4.5", totalMarks: "5", topic: "Errors" },
-          { obtainedMarks: "2.5", totalMarks: "5", topic: "Significant Figures" },
-          { obtainedMarks: "4", totalMarks: "5", topic: "Motion" }
-        ],
-        longQuestions: [
-          { obtainedMarks: "10", totalMarks: "10", topic: "Circular Motion" },
-          { obtainedMarks: "9", totalMarks: "10", topic: "Linear Motion" },
-          { obtainedMarks: "9.5", totalMarks: "10", topic: "Laws Of Motion" }
-        ]
-      },
-      {
-        name: "English",
-        mcq: { obtained: "20", total: "20" },
-        shortQuestions: [
-          { obtainedMarks: "5", totalMarks: "5", topic: "Tenses" },
-          { obtainedMarks: "4.5", totalMarks: "5", topic: "Active Passive" },
-          { obtainedMarks: "2", totalMarks: "5", topic: "Don't Quit (poem)" },
-          { obtainedMarks: "3", totalMarks: "5", topic: "Ozymandias (poem)" },
-          { obtainedMarks: "3.5", totalMarks: "5", topic: "Choosing A Career(chapter)" }
-        ],
-        longQuestions: [
-          { obtainedMarks: "10", totalMarks: "10", topic: "Essay" },
-          { obtainedMarks: "9.5", totalMarks: "10", topic: "CV Writing" },
-          { obtainedMarks: "9.5", totalMarks: "10", topic: "Application" }
-        ]
-      }
-    ]
-  };
 
-  
   const fetchStudentData = async () => {
     try {
       const { GoogleGenerativeAI } = require("@google/generative-ai");
@@ -1066,7 +889,7 @@ function CareerSuggestions() {
       `;
       
       const result = await model.generateContent(prompt);
-      setDetail(<pre>{result?.response?.text()}</pre>);
+      setDetail(<pre className="whitespace-pre-wrap break-words" >{result?.response?.text()}</pre>);
       // console.log(typeof( detail) , detail );
     } catch (error) {
       console.log('from ai' ,error);
@@ -1074,7 +897,6 @@ function CareerSuggestions() {
     }
   }
 fetchStudentData()
-
   return (
     <Card>
       <CardContent className="pt-6">
@@ -1083,7 +905,7 @@ fetchStudentData()
             <BrainCircuit className="h-5 w-5" />
             <h2 className="text-xl font-semibold">Career Suggestions</h2>
           </div>
-{detail}
+          {detail}
           {/* <p className="text-muted-foreground">
             Based on your academic performance and strengths in {strengths?.join(', ')}, here are some career paths you might consider:
           </p>
@@ -1100,19 +922,15 @@ fetchStudentData()
 
 function getSubjectColor(subject: string): string {
   const colors: { [key: string]: string } = {
-    computer: "blue",
-    maths: "purple",
-    physics: "green",
-    english: "yellow",
-    islamiat: 'orange,',
-    chemistry: 'brown,'
+    Computer: "blue",
+    Maths: "purple",
+    Physics: "green",
+    English: "yellow"
   }
-
-  return colors[subject.toLowerCase()] || "gray"
+  return colors[subject] || "gray"
 }
 
 function calculateSubjectPercentage(subject: Subject): number {
-
   const totalMarks = parseInt(subject.mcq.total) + 
     subject?.shortQuestions.reduce((sum: number, q: { totalMarks: string }) => sum + parseInt(q.totalMarks), 0) +
     subject?.longQuestions.reduce((sum: number, q: { totalMarks: string }) => sum + parseInt(q.totalMarks), 0);
@@ -1172,8 +990,8 @@ function getPerformanceLevel(percentage: number): string {
 function identifyStrengths(): string[] {
   const { studentData } = useStudentContext();
   return studentData?.subjects
-    ?.filter((subject: any) => calculateSubjectPercentage(subject) >= 80)
-    ?.map((subject: { name: any }) => subject.name);
+    .filter((subject: any) => calculateSubjectPercentage(subject) >= 80)
+    .map((subject: { name: any }) => subject.name);
 }
 
 function identifyWeaknesses(): string[] {
@@ -1204,7 +1022,7 @@ function getCareerSuggestions(strengths: string[]): string[] {
   return strengths?.flatMap(strength => careerMap[strength] || []);
 }
 
- function Details(){
+function Details(){
   const [detail ,setDetail] =useState<JSX.Element>(<pre></pre>)
   // const { studentData } = useStudentContext();
   const { studentData } = useStudentContext();
@@ -1222,17 +1040,20 @@ function getCareerSuggestions(strengths: string[]): string[] {
       - Provide a detailed summary of overall performance.
       - Identify topic-wise weaknesses.
       - Suggest actionable recommendations for improvement for each weak topic.
+      - Provide Youtube Videos and documents related every week topic to improve them.
       - Based on the analysis, suggest potential career paths considering strengths and interests.
       Here's the data: ${JSON.stringify(studentData.subjects)}.
+      Note: Dont use stars while giving response.
       
       `;
       
       const result = await model.generateContent(prompt);
-      setDetail(<pre >{result?.response?.text()}</pre>);
+      setDetail(<pre className="whitespace-pre-wrap break-words" >{result?.response?.text()}</pre>);
       console.log(detail);
       
     } catch (error) {
       console.log('from ai' ,error);
+      
       
     }
   }
@@ -1242,73 +1063,73 @@ return (
   <Card>
   <CardTitle>Analysis</CardTitle>
   <CardContent className="overflow-auto">
-
 {detail}
   </CardContent>
 </Card>
 )
 }
 
+
+
 function Modal({ selectedSubject, }:
-{ selectedSubject: Subject | null,
-})
-{
-
+  { selectedSubject: Subject | null,
+  })
+  {
   
-  const [modal ,setModal ] =useState(false)
-  const [index ,setIndex ] =useState(0)
-  const [image ,setImage ] =useState('/math2.jpg')
-
-
-let images :string[] = [];
-let selectImages: { [key: string]: string[] } = {
-  maths:['/math2.jpg'],
-  urdu:['/urdu1.jpg','/urdu2.jpg','/urdu3.jpg'],
-  computer:['/computer2.jpg'],
-  english:['/english1.jpg' ,'/english2.jpg'],
-  islamiat:['islamiat1.jpg','/islamiat2.jpg'],
-  physics:['/physics1.jpg' ,'/physics2.jpg']
-}
-
-useEffect(()=>{
-  let sub =selectedSubject?.name
- let img = selectImages[`${sub?.toLowerCase()}`]  
- img?.forEach((i)=>images.push(i))
-console.log(images);
-console.log(images[index]);
-setImage(images[index])
-},[images ,selectedSubject , modal,index])
-
-
-  return(
-
-    <>
-  <button onClick={()=>setModal(!modal)} id="open-carousel" className="px-5 py-1 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition">
-   Exam Paper
-  </button>
-
- 
-  <div id="modal" className={`${modal ? 'flex' :'hidden'}  fixed inset-0  bg-black bg-opacity-60  items-center justify-center z-50 `}>
-    <div className="relative bg-white rounded-lg p-4 max-w-3xl w-full flex flex-col items-center">
-      {/* <!-- Close Button --> */}
-      <button onClick={()=>setModal(!modal)} id="close-button" className="absolute top-3 right-3 text-white bg-red-500 w-8 h-8 rounded-full flex items-center justify-center hover:bg-red-600 transition">
-        &times;
-      </button>
-
-      {/* <!-- Image --> */}
-      <Image id="modal-image" src={image} width={600} height={1000} alt="Projection" className="w-full max-h-[500px] object-contain rounded-lg shadow-md"/>
-
-      {/* <!-- Navigation Buttons --> */}
-      <button onClick={()=>setIndex((index - 1 + images.length) % images.length)} id="prev-button" className="absolute left-1 top-1/2 -translate-y-1/2 text-white bg-gray-800 p-2 rounded-full hover:bg-gray-700 transition">
-        &#10094;
-      </button>
-      <button onClick={()=>setIndex( (index + 1) % images.length)} id="next-button" className="absolute right-1 top-1/2 -translate-y-1/2 text-white bg-gray-800 p-2 rounded-full hover:bg-gray-700 transition">
-        &#10095;
-      </button>
+    
+    const [modal ,setModal ] =useState(false)
+    const [index ,setIndex ] =useState(0)
+    const [image ,setImage ] =useState('/math2.jpg')
+  
+  
+  let images :string[] = [];
+  let selectImages: { [key: string]: string[] } = {
+    maths:['/math2.jpg'],
+    urdu:['/urdu1.jpg','/urdu2.jpg','/urdu3.jpg'],
+    computer:['/computer2.jpg'],
+    english:['/english1.jpg' ,'/english2.jpg'],
+    islamiat:['islamiat1.jpg','/islamiat2.jpg'],
+    physics:['/physics1.jpg' ,'/physics2.jpg']
+  }
+  
+  useEffect(()=>{
+    let sub =selectedSubject?.name
+   let img = selectImages[`${sub?.toLowerCase()}`]  
+   img?.forEach((i)=>images.push(i))
+  console.log(images);
+  console.log(images[index]);
+  setImage(images[index])
+  },[images ,selectedSubject , modal,index])
+  
+  
+    return(
+  
+      <>
+    <button onClick={()=>setModal(!modal)} id="open-carousel" className="px-5 py-1 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition">
+     Exam Paper
+    </button>
+  
+   
+    <div id="modal" className={`${modal ? 'flex' :'hidden'}  fixed inset-0  bg-black bg-opacity-60  items-center justify-center z-50 `}>
+      <div className="relative bg-white rounded-lg p-4 max-w-3xl w-full h-auto flex flex-col items-center">
+        {/* <!-- Close Button --> */}
+        <button onClick={()=>setModal(!modal)} id="close-button" className="absolute top-3 right-3 text-white bg-red-500 w-8 h-8 rounded-full flex items-center justify-center hover:bg-red-600 transition">
+          &times;
+        </button>
+  
+        {/* <!-- Image --> */}
+        <Image id="modal-image" src={image} width={600} height={1000} alt="Projection" className="w-full max-h-[500px] object-contain rounded-lg shadow-md"/>
+  
+        {/* <!-- Navigation Buttons --> */}
+        <button onClick={()=>setIndex((index - 1 + images.length) % images.length)} id="prev-button" className="absolute left-1 top-1/2 -translate-y-1/2 text-white bg-gray-800 p-2 rounded-full hover:bg-gray-700 transition">
+          &#10094;
+        </button>
+        <button onClick={()=>setIndex( (index + 1) % images.length)} id="next-button" className="absolute right-1 top-1/2 -translate-y-1/2 text-white bg-gray-800 p-2 rounded-full hover:bg-gray-700 transition">
+          &#10095;
+        </button>
+      </div>
     </div>
-  </div>
- 
- </>
-  )
-}
-
+   
+   </>
+    )
+  }
