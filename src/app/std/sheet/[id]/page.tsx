@@ -92,12 +92,12 @@ export default function Sheet(){
         }, [studentData])
     return(
         <Card>
-        <CardHeader>
+        {/* <CardHeader>
           <CardTitle className="text-2xl">Student Marksheet</CardTitle>
-        </CardHeader>
+        </CardHeader> */}
         <CardContent className="p-0 sm:p-2 md:p-6">
     
-<div className="report-card p-2 sm:p-5 md:p-8">
+<div className="report-card p-2 m-1 sm:p-5 md:p-8 mx-auto my-2 max-w-screen-md">
     <div className="header">
       
         <h1>REPORT CARD</h1>

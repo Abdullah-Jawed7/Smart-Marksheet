@@ -1,6 +1,6 @@
 "use client"
 
-import  SubjectAnalysis  from "@/components/compo/subjectAnalysis"
+import  SubjectAnalysis from "@/components/compo/subjectAnalysis"
 import { useState } from "react"
 import { Subject  } from "@/lib/types"
 import { useStudentContext } from "@/components/hook/data";
@@ -27,6 +27,7 @@ export default function SubjectPage({ params }: { params: { subject: string } })
           setGraphType={setPerformanceGraphType} 
           handleQuestionTypeClick={handleQuestionType}
           />
+         
     </div>
   )
 }

@@ -1,11 +1,11 @@
 "use client"
 import { motion } from "framer-motion"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Progress } from "@/components/ui/progress"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Cell } from 'recharts'
 import { useStudentContext } from '@/components/hook/data';
 import {Subject} from '@/lib/types'
 import Modal from './questionPaper'
+import GraphSelector from "./graphSelector"
 
 
 export default function SubjectOverview({ subject, graphType, setGraphType }: { subject: Subject, graphType: string, setGraphType: (type: string) => void }) {
@@ -44,17 +44,8 @@ export default function SubjectOverview({ subject, graphType, setGraphType }: { 
           <Modal  selectedSubject={subject} />
         </div>
         <div className="space-y-4 sm:space-y-6">
-          <Select value={graphType} onValueChange={setGraphType}>
-            <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="Graph type" />
-            </SelectTrigger>
-            <SelectContent className="bg-white">
-              <SelectItem value="bar">Bar Graph</SelectItem>
-              <SelectItem value="line">Line Graph</SelectItem>
-              <SelectItem value="pie">Pie Chart</SelectItem>
-              <SelectItem value="radar">Radar Chart</SelectItem>
-            </SelectContent>
-          </Select>
+         
+       <GraphSelector graphType={graphType} setGraphType={setGraphType}  />
           <div className="h-[200px] sm:h-[250px] md:h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
             {(() => {

@@ -9,6 +9,8 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
+    <html lang="en" className="font-sans">
+      <body>  
     <div className="flex h-screen bg-gray-100">
       <Sidebar />
       <AnimatePresence mode="wait">
@@ -24,6 +26,8 @@ export default function RootLayout({
         </motion.main>
       </AnimatePresence>
     </div>
+    </body>
+    </html>
   )
 }
 

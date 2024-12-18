@@ -23,14 +23,6 @@ export function Sidebar() {
           <span>Dashboard</span>
         </Link>
         <Link
-          href="#"
-          onClick={()=>setIsOpened(!isOpened)}
-          className="flex  items-center space-x-3 rounded-lg px-3 py-2 text-gray-600  active:bg-gray-100 active:text-gray-900 hover:bg-gray-100 hover:text-gray-900"
-        >
-          <BarChart2 className="h-5 w-5" />
-          <span>Performance</span>
-        </Link>
-        <Link
           href="/std/subjects"
           onClick={()=>setIsOpened(!isOpened)}
           className="flex items-center space-x-3 rounded-lg px-3 py-2 text-gray-600  active:bg-gray-100 active:text-gray-900 hover:bg-gray-100 hover:text-gray-900"
@@ -47,8 +39,16 @@ export function Sidebar() {
           <span>Report Card</span>
         </Link>
         <Link
+          href="/std/suggestion"
+          onClick={()=>setIsOpened(!isOpened)}
+          className="flex  items-center space-x-3 rounded-lg px-3 py-2 text-gray-600  active:bg-gray-100 active:text-gray-900 hover:bg-gray-100 hover:text-gray-900"
+        >
+          <BarChart2 className="h-5 w-5" />
+          <span>Suggestions</span>
+        </Link>
+        <Link
          onClick={()=>setIsOpened(!isOpened)}
-          href="#"
+          href="/std/career"
           className="flex items-center space-x-3 rounded-lg px-3 py-2 text-gray-600 hover:bg-gray-100 hover:text-gray-900"
         >
           <GraduationCap className="h-5 w-5" />

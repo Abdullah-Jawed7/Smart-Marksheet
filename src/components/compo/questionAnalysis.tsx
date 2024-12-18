@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Cell } from 'recharts'
 import { useStudentContext } from '@/components/hook/data';
-
+import GraphSelector from "./graphSelector"
 
 export default function QuestionAnalysis({ type, questions, graphType, setGraphType }: { type: string, questions: { obtainedMarks: string, totalMarks: string, topic: string }[], graphType: string, setGraphType: (type: string) => void }) {
     const { studentData } = useStudentContext();
@@ -45,20 +45,12 @@ export default function QuestionAnalysis({ type, questions, graphType, setGraphT
               ))}
             </div>
             <div className="sm:col-span-2">
-              <Select value={graphType} onValueChange={setGraphType} >
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue placeholder="Graph type" />
-                </SelectTrigger>
-                <SelectContent className="bg-white">
-                  <SelectItem value="bar">Bar Graph</SelectItem>
-                  <SelectItem value="line">Line Graph</SelectItem>
-                  <SelectItem value="pie">Pie Chart</SelectItem>
-                  <SelectItem value="radar">Radar Chart</SelectItem>
-                </SelectContent>
-              </Select>
+             
+              <GraphSelector graphType={graphType} setGraphType={setGraphType}  />
               <div className="h-[300px] sm:h-[350px] md:h-[400px]">
               <ResponsiveContainer width="100%" height="100%">
-              {(() => {
+              {(
+                () => {
                 if (graphType === "bar") {
                   return (
                     <BarChart data={data}>
@@ -125,3 +117,5 @@ export default function QuestionAnalysis({ type, questions, graphType, setGraphT
     if (percentage >= 60) return 'yellow';
     return 'red';
   }
+
+  
