@@ -25,8 +25,9 @@ import {
 } from "@/components/ui/table";
 import Header from "@/components/compo/header";
 import Footer from "@/components/compo/footer";
-import './style.css';
+// import './style.css';
 import QRCode from 'qrcode';
+import { StudentInfo ,Subject ,Question } from '@/lib/types';
 
 const gradeScale = [
   { min: 90, grade: "A+" },
@@ -44,26 +45,6 @@ const calculateGrade = (percentage: number) => {
   return "F";
 };
 
-interface Question {
-  obtainedMarks: string;
-  totalMarks: string;
-  topic: string;
-}
-
-interface Subject {
-  name: string;
-  mcq: { obtained: string; total: string };
-  shortQuestions: Question[];
-  longQuestions: Question[];
-}
-
-interface StudentInfo {
-  name: string;
-  rollNo: string;
-  class: string;
-  group: string;
-  subjects: Subject[];
-}
 
 export default function SmartMarksheet() {
   const [studentInfo, setStudentInfo] = useState<StudentInfo>({

@@ -1,26 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-// Define the types for the API
-interface Question {
-  obtainedMarks: string;
-  totalMarks: string;
-  topic: string;
-}
-
-interface Subject {
-  name: string;
-  mcq: { obtained: string; total: string };
-  shortQuestions: Question[];
-  longQuestions: Question[];
-}
-
-interface StudentInfo {
-  name: string;
-  rollNo: string;
-  class: string;
-  group: string;
-  subjects: Subject[];
-}
+import { StudentInfo } from '@/lib/types';
 
 // In-memory database for storing student information
 let students: StudentInfo[] = [

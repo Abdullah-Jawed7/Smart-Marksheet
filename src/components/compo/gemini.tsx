@@ -8,7 +8,7 @@ export default function Gemini({instruction }:{instruction:string}):JSX.Element{
       try {
         const { GoogleGenerativeAI } = require("@google/generative-ai");
   
-        const genAI = new GoogleGenerativeAI("AIzaSyC9RVDBFrIK6Y6CHhiW2widc5ifCGGLPVA");
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
         
         const prompt = instruction
