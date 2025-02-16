@@ -44,7 +44,7 @@ import {Subject} from '@/lib/types'
   
    
     <div id="modal" className={`${modal ? 'flex' :'hidden'}  fixed inset-0  bg-black bg-opacity-60  items-center justify-center z-50 `}>
-      <div className="relative bg-white rounded-lg p-4 max-w-3xl w-full h-auto flex flex-col items-center">
+      <div className="relative rounded-lg p-4 max-w-3xl w-full md:w-2/3 h-auto flex flex-col items-center">
         {/* <!-- Close Button --> */}
         <button onClick={()=>setModal(!modal)} id="close-button" className="absolute top-3 right-3 text-white bg-red-500 w-8 h-8 rounded-full flex items-center justify-center hover:bg-red-600 transition">
           &times;
@@ -54,10 +54,10 @@ import {Subject} from '@/lib/types'
         <Image id="modal-image" src={image} width={600} height={1000} alt="Projection" className="w-full max-h-[500px] object-contain rounded-lg shadow-md"/>
   
         {/* <!-- Navigation Buttons --> */}
-        <button onClick={()=>setIndex((index - 1 + images.length) % images.length)} id="prev-button" className="absolute left-1 top-1/2 -translate-y-1/2 text-white bg-gray-800 p-2 rounded-full hover:bg-gray-700 transition">
+        <button onClick={()=>setIndex((index - 1 + images.length) % images.length)} id="prev-button" className="absolute left-3 top-1/2 -translate-y-1/2 text-white bg-gray-800 p-2 rounded-full hover:bg-gray-700 transition">
           &#10094;
         </button>
-        <button onClick={()=>setIndex( (index + 1) % images.length)} id="next-button" className="absolute right-1 top-1/2 -translate-y-1/2 text-white bg-gray-800 p-2 rounded-full hover:bg-gray-700 transition">
+        <button onClick={()=>setIndex( (index + 1) % images.length)} id="next-button" className="absolute right-3 top-1/2 -translate-y-1/2 text-white bg-gray-800 p-2 rounded-full hover:bg-gray-700 transition">
           &#10095;
         </button>
       </div>

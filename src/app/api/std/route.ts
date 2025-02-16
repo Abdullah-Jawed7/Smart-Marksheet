@@ -42,7 +42,7 @@ const students: StudentInfo[] = [
     ],
   },
   {
-    name: 'John Doe',
+    name: 'Abdul Hadi',
     rollNo: '123',
     class: '10th',
     group: 'Science',
