@@ -51,7 +51,7 @@ export const GeminiProvider: React.FC<GeminiProviderProps> = ({ children}) => {
     const fetchGeminiForInstruction = async (instruction: string) => {
       try {
         const { GoogleGenerativeAI } = await import('@google/generative-ai');
-        const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+        const apiKey = 'AIzaSyB_ibmC2At5LY0N4o6N2_TrHkL4HZEiFqs';
         if (!apiKey) {
           throw new Error('NEXT_PUBLIC_GEMINI_API_KEY is not defined');
         }
