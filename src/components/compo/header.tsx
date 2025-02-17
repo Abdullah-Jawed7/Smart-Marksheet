@@ -30,9 +30,7 @@ export default function Header() {
         <span className="ml-2 text-xl font-bold text-blue-900 dark:text-blue-100">Smart Marksheet</span>
       </Link>
       <nav className="ml-auto flex gap-4 sm:gap-6">
-        <Button className="text-sm font-medium text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400" variant="ghost">Home</Button>
-        <Button className="text-sm font-medium text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400" variant="ghost" >Analyze</Button>
-        <Button className="text-sm font-medium text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400" variant="ghost" >Compare</Button>
+        <Button className="text-sm font-medium text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400" variant="ghost">Home</Button> 
       </nav>
     </header>
     )

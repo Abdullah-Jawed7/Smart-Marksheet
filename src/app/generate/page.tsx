@@ -202,10 +202,10 @@ let percentage = (perObt/perTotal)*100
       </h1>
 
       <Tabs defaultValue="entry" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        {/* <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="entry">Data Entry</TabsTrigger>
           <TabsTrigger value="view">View Marksheet</TabsTrigger>
-        </TabsList>
+        </TabsList> */}
         <TabsContent value="entry">
           {/* Personal Information */}
           <Card className="mb-8">
@@ -512,7 +512,7 @@ let percentage = (perObt/perTotal)*100
             </Button>
           </div>
         </TabsContent>
-        <TabsContent value="view">
+        {/* <TabsContent value="view">
           <Card>
             <CardHeader>
               <CardTitle className="text-2xl">Student Marksheet</CardTitle>
@@ -583,7 +583,7 @@ let percentage = (perObt/perTotal)*100
               
             </CardContent>
           </Card>
-        </TabsContent>
+        </TabsContent> */}
       </Tabs>
     </div>
     <Footer/>
